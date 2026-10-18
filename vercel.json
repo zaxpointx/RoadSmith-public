@@ -1,0 +1,7 @@
+{
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://evswdlsqlaztvajibgta.supabase.co",
+    "STRIPE_STARTER_PRICE_ID": "price_1TQFJ6C774ttQGnys6bWubzH"
+  },
+  "buildCommand": "npm run build"
+}
