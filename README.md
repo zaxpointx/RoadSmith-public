@@ -27,9 +27,25 @@ The operator-approval boundary is intentional: a recommendation is not a confirm
 
 This repository is an internship-review release candidate, not a production-ready deployment.
 
-Implemented areas include the public booking flow, school onboarding, school-admin dashboard, instructors, sessions, calendar, student records, CSV import, Tennessee compliance readiness tracking, demo mode, Stripe integration points, transactional email integration points, and workflow-watchdog tests. Government-form generation and submission remain partial.
+### Working now
 
-Experimental or review-required areas include newer scheduling and payment orchestration, production migration reconciliation, live RLS verification, and the exact canonical Vercel project/hostname relationship. Historical agent-operator migrations remain for reconciliation but are not part of the public runtime. SMS reminders, complete instructor availability management, government-form submission, and production-grade automation are not claimed as complete.
+Implemented areas include the public booking flow, school onboarding, school-admin dashboard, instructors, sessions, calendar, student records, CSV import, Tennessee compliance readiness tracking, demo mode, Stripe integration points, transactional email integration points, and workflow-watchdog tests.
+
+### Demonstrable locally
+
+The operator-review demo runs against synthetic fixtures, evaluates four safety detectors, records an approval decision, and produces no external side effects. See [DEMO.md](DEMO.md) for the five-minute path.
+
+### Experimental
+
+Newer scheduling and payment orchestration, production migration reconciliation, live RLS verification, and the exact canonical Vercel project/hostname relationship require review.
+
+### Not implemented or partial
+
+Government-form generation and submission, SMS reminders, complete instructor availability management, and production-grade automation are not claimed as complete. Historical agent-operator migrations remain for reconciliation but are not part of the public runtime.
+
+### Requires production hardening
+
+Hosted schema parity, tenant-isolation verification, dependency remediation, provider failure handling, observability, and deployment ownership must be resolved before production use.
 
 ## Stack
 
@@ -90,7 +106,7 @@ public/               Public assets reviewed for release safety
 .github/              CI, issue templates, and pull-request guidance
 ```
 
-For the complete reviewer path, start with [docs/INTERNSHIP_REVIEW.md](docs/INTERNSHIP_REVIEW.md), then read [SPEC.md](SPEC.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/WORKFLOWS.md](docs/WORKFLOWS.md), and [docs/PUBLIC-RELEASE-BOUNDARY.md](docs/PUBLIC-RELEASE-BOUNDARY.md). Historical specifications are retained under `archive/`.
+For the complete reviewer path, start with [DEMO.md](DEMO.md), then [docs/ENGINEERING-HIGHLIGHTS.md](docs/ENGINEERING-HIGHLIGHTS.md), [docs/INTERNSHIP_REVIEW.md](docs/INTERNSHIP_REVIEW.md), [SPEC.md](SPEC.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/WORKFLOWS.md](docs/WORKFLOWS.md), and [docs/PUBLIC-RELEASE-BOUNDARY.md](docs/PUBLIC-RELEASE-BOUNDARY.md). Historical specifications are retained under `archive/`.
 
 ## Contributing and security
 
@@ -98,4 +114,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development and verification expectat
 
 ## License
 
-Roadsmith is proprietary software. See [LICENSE](LICENSE). Public visibility, if approved later, does not grant permission to use, copy, modify, or redistribute the software.
+Roadsmith is proprietary software. See [LICENSE](LICENSE). Public visibility does not grant permission to use, copy, modify, or redistribute the software.
