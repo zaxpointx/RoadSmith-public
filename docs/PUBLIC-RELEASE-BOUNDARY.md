@@ -10,7 +10,7 @@ Product source, tests, safe schema documentation, reconciled migrations, public 
 
 Environment files, provider credentials, production exports, customer data, booking tokens, private agent state, personal memory, internal prompts, operational logs, generated reports, local provider state, and unreviewed administrative or experimental routes do not belong in the public release tree.
 
-The cleanup preserved pre-existing private and ambiguous material outside this repository under `/tmp/roadsmith-cleanup-baseline/preserved-private/` for this working session. It was not copied into the repository. That session-local path is not a repository dependency or release artifact.
+Private and ambiguous material from the source worktree was not copied into this release repository. No local backup path is part of the release artifact.
 
 ## Review-required material
 
@@ -20,10 +20,10 @@ Historical Mission Control migrations, demo routes, and generated-looking public
 
 These items require owner approval and access to hosted systems; no external action is performed by local cleanup:
 
-- GitHub: review repository visibility and branch protection, review open dependency alerts, and handle any provider-like credentials found in history through the provider owners and an approved history-rotation procedure.
+- GitHub: review repository visibility, branch protection, and dependency alerts before publication.
 - Supabase: reconcile live migration history and schema drift, then verify authentication, tenant isolation, and RLS against the linked project before any migration or production-data change.
 - Vercel and Stripe: verify the canonical project/hostname, environment-variable ownership, deployment health, and Stripe API/version compatibility before release or billing changes.
 
-## Historical credentials
+## Credential status
 
-Repository history contains provider-like credential references identified during the audit. No values are reproduced here. Affected providers must be reviewed and rotated by their owner before visibility changes; history rewriting is a separate approved security procedure.
+This fresh-history release contains no credential-shaped values. Environment variable names in `.env.example` are placeholders only; no credential values are included. Hosted credentials and provider administration remain outside this repository.
