@@ -58,7 +58,7 @@ export function LandingPage() {
 
       <section className="rs-pricing" id="pricing"><div className="rs-section-label">A FOCUSED STARTING POINT</div><h2>Everything your school<br /><span>needs to run the day.</span></h2><div className="rs-price-card"><div><small>ROADSMITH FOR OWNER-OPERATORS</small><strong>Let’s talk</strong><p>We’ll show you the right starting point for your school.</p></div><ul><li>Daily operating brief</li><li>Parent intake and owner-approved next steps</li><li>Travel-aware capacity context</li><li>Payments, reminders, bookings, and notes</li></ul><Link className="rs-primary-cta" href="/contact">Request a conversation <Arrow /></Link></div></section>
 
-      <footer className="rs-footer"><Brand /><span>Built for schools that move people forward.</span><div><a href="mailto:hello@roadsmith.app">hello@roadsmith.app</a><a href="https://github.com/ZaxPointZ/roadsmith" target="_blank" rel="noopener noreferrer">GitHub</a></div></footer>
+      <footer className="rs-footer"><Brand /><span>Built for schools that move people forward.</span><div><a href="mailto:hello@roadsmith.app">hello@roadsmith.app</a><a href="https://github.com/zaxpointx/RoadSmith-public" target="_blank" rel="noopener noreferrer">GitHub</a></div></footer>
     </main>
   );
 }

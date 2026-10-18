@@ -4,7 +4,7 @@ Roadsmith is a white-label operations platform for driving schools. Contribution
 
 ## Before opening a pull request
 
-1. Read `AGENTS.md` and the applicable product or architecture documentation.
+1. Read the README and the applicable product or architecture documentation.
 2. Confirm the change is based on the actual schema in `ACTUAL_SCHEMA.md` and the tracked migrations.
 3. Keep secrets, customer data, provider exports, local agent state, and generated output out of the repository.
 4. Update `.env.example` when adding an environment variable. Include names and safe placeholders only.

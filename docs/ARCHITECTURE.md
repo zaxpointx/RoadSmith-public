@@ -22,6 +22,9 @@ The intended workflow is parent-first intake → travel-aware scheduling proposa
 - Resend handles transactional email. Provider errors must not expose credentials or internal details to callers.
 - Vercel hosts the Next.js application. The canonical project and hostname are documented as a deployment decision, not inferred from a successful local build.
 
-## Public-release constraints
+## Review and release constraints
 
-Customer data, service-role access, payment secrets, provider state, internal agent operations, and production-only routes are not public documentation. See `SECURITY.md` and `docs/PUBLIC-RELEASE-BOUNDARY.md` for the release boundary and unresolved verification items.
+Customer data, service-role access, payment secrets, provider state, internal
+agent operations, and production-only routes are outside the public review
+surface. See `SECURITY.md` and `docs/PUBLIC-RELEASE-BOUNDARY.md` for the
+documented release boundary and unresolved verification items.

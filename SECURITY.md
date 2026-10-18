@@ -1,6 +1,9 @@
 # Security policy
 
-Roadsmith is not yet a public production security program. Until the public-release gate is complete, treat the repository and hosted services as private.
+Roadsmith is a public pre-release repository, not a production security
+program. The source is available for review, but the application is not
+presented as a live production service and no customer or production data
+belongs here.
 
 ## Do not commit
 
@@ -17,7 +20,13 @@ The safe template is `.env.example`. Local credentials belong in an ignored `.en
 
 ## Reporting a vulnerability
 
-Do not open a public issue for a suspected secret, customer-data exposure, authentication bypass, tenant-isolation failure, payment flaw, webhook flaw, or unsafe administrative route. Contact the repository owner privately with a minimal description, affected path or commit, reproduction steps that do not access real data, and the proposed containment.
+Do not open a public issue for a suspected secret, customer-data exposure,
+authentication bypass, tenant-isolation failure, payment flaw, webhook flaw, or
+unsafe administrative route. Use the repository’s [private security advisory
+form](https://github.com/zaxpointx/RoadSmith-public/security/advisories/new)
+when available, or contact the repository owner privately with a minimal
+description, affected path or commit, reproduction steps that do not access
+real data, and the proposed containment.
 
 If a credential may have entered Git history, stop using it and report it for provider-side rotation. Removing the current file does not invalidate a historical credential.
 

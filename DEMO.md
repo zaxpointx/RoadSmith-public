@@ -4,11 +4,6 @@ This is the fastest way for a reviewer to understand the project. The demo is
 read-only with synthetic fixtures: it does not send messages, charge cards,
 create bookings, mutate Supabase, call Maps, or contact any provider.
 
-## Live review URL
-
-The preferred disposable review hostname is [roadsmith-phi.vercel.app](https://roadsmith-phi.vercel.app/).
-Availability and configuration may change; the reproducible path below is local.
-
 ## Local setup
 
 Requirements: Node.js 22 or newer and npm.

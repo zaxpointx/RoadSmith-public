@@ -1,13 +1,14 @@
 import { chromium } from 'playwright';
+const baseUrl = process.env.LIVE_BASE_URL || 'http://localhost:3000';
 const pages = [
-  ['home', 'https://roadsmith.vercel.app/'],
-  ['pricing', 'https://roadsmith.vercel.app/pricing'],
-  ['login', 'https://roadsmith.vercel.app/login'],
-  ['signup', 'https://roadsmith.vercel.app/signup'],
-  ['school-admin', 'https://roadsmith.vercel.app/school-admin'],
-  ['onboarding', 'https://roadsmith.vercel.app/onboarding'],
-  ['forgot-password', 'https://roadsmith.vercel.app/forgot-password'],
-  ['book', 'https://roadsmith.vercel.app/book'],
+  ['home', `${baseUrl}/`],
+  ['pricing', `${baseUrl}/pricing`],
+  ['login', `${baseUrl}/login`],
+  ['signup', `${baseUrl}/signup`],
+  ['school-admin', `${baseUrl}/school-admin`],
+  ['onboarding', `${baseUrl}/onboarding`],
+  ['forgot-password', `${baseUrl}/forgot-password`],
+  ['book', `${baseUrl}/book`],
 ];
 const sizes = [['1440',1440,900],['375',375,812]];
 const outDir = '/tmp/playwright-captures';

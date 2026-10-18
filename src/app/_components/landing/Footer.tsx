@@ -9,7 +9,7 @@ export function Footer() {
         <span className="rl-footer-links">
           <a href="mailto:hello@roadsmith.app">hello@roadsmith.app</a>
           <a
-            href="https://github.com/ZaxPointZ/roadsmith"
+            href="https://github.com/zaxpointx/RoadSmith-public"
             target="_blank"
             rel="noopener noreferrer"
           >

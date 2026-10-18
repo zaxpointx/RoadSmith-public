@@ -1,10 +1,11 @@
 # Roadsmith documentation
 
-This directory is the starting point for engineers and coding agents. Read the repository contract first, then use this index to find the current authority for a question.
+This directory is the starting point for reviewers and contributors. Use this
+index to find the current authority for a question.
 
 ## Start here
 
-1. [`../AGENTS.md`](../AGENTS.md) — safety boundaries, repository identity, and required checks.
+1. [`../README.md`](../README.md) — product overview, reviewer quick start, and local demo.
 2. [`../CONTRIBUTING.md`](../CONTRIBUTING.md) — contribution and verification workflow.
 3. [`INTERNSHIP_REVIEW.md`](INTERNSHIP_REVIEW.md) — reviewer reading path, inventory, sanitization record, and unresolved decisions.
 4. [`REPOSITORY-MAP.md`](REPOSITORY-MAP.md) — current repository map.
@@ -13,7 +14,7 @@ This directory is the starting point for engineers and coding agents. Read the r
 
 | Question | Current authority | Status |
 | --- | --- | --- |
-| Repository safety and agent boundaries | [`../AGENTS.md`](../AGENTS.md) | Authoritative |
+| Repository safety and public boundary | [`PUBLIC-RELEASE-BOUNDARY.md`](PUBLIC-RELEASE-BOUNDARY.md) and [`../SECURITY.md`](../SECURITY.md) | Current guidance |
 | Human contribution workflow | [`../CONTRIBUTING.md`](../CONTRIBUTING.md) | Authoritative |
 | Application architecture | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Current guidance |
 | Repository navigation | [`REPOSITORY-MAP.md`](REPOSITORY-MAP.md) | Current guidance; verify paths before relying on them |
@@ -33,4 +34,6 @@ This directory is the starting point for engineers and coding agents. Read the r
 
 ## Important rule
 
-If two documents disagree, do not guess. Follow `AGENTS.md`, identify the conflict, and stop for an owner decision when resolving it would change application behavior, database behavior, hosted settings, credentials, billing, or production operations.
+If two documents disagree, do not guess. Identify the conflict and stop for an
+owner decision when resolving it would change application behavior, database
+behavior, hosted settings, credentials, billing, or production operations.
