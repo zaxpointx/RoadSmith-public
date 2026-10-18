@@ -86,5 +86,5 @@ Private agent state, personal memory, customer data, provider credentials, gener
 ## Canonical project identity
 
 This is the Roadsmith repository. It is the white-label driving-school SaaS
-application repository, not a workflow lab, Hermes harness, audit workspace, or
+application repository, not a workflow lab, audit workspace, or
 scratch directory.
