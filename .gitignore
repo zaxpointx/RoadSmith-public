@@ -1,0 +1,83 @@
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+build/
+dist/
+
+# Environment files — NEVER commit
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# Vercel build artifacts
+.vercel
+
+# Supabase local
+supabase/.temp/
+
+# Stripe
+.stripe_*
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test artifacts
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Local agent state and generated research
+.hermes/
+.claude/
+.openclaw/
+.herenow/
+.codex/
+.learnings/
+.scout/
+scout-reports/
+memory/
+prompts/
+research/
+research-private/
+private-release-archive/
+
+# Root-level local screenshots and visual test exports
+/screenshot_*.png
+/mc-test.png
+
+# Misc
+notion_export.zip
+notion_content/
+
+# TypeScript build info
+*.tsbuildinfo
+next-env.d.ts
+
+# Generated Graphify knowledge graph (rebuild locally with `graphify extract . --code-only --out .`)
+graphify-out/
+
+# Sensitive local files
+*.pem
+*.key
+*.p12
+
+# Local audit and release outputs
+release-review/
+security-scan-results/

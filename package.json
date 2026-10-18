@@ -1,0 +1,57 @@
+{
+  "name": "roadsmith",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build --webpack",
+    "start": "next start",
+    "lint": "eslint src e2e scripts",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test:unit": "node --experimental-strip-types --test tests/unit/*.test.mjs",
+    "test:e2e": "playwright test",
+    "check:public": "bash scripts/verify-public-release.sh",
+    "check:history": "bash scripts/verify-git-history.sh",
+    "check:dependencies": "node scripts/reliability/dependency-security-check.mjs",
+    "verify:completion": "node scripts/reliability/completion-verifier.mjs",
+    "test": "npm run test:unit"
+  },
+  "dependencies": {
+    "@react-three/fiber": "^9.6.1",
+    "@supabase/ssr": "^0.10.2",
+    "@types/stripe": "^8.0.416",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.38.0",
+    "lucide-react": "^1.17.0",
+    "next": "16.4.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "stripe": "^22.0.2",
+    "tailwind-merge": "^3.6.0",
+    "three": "^0.184.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/three": "^0.184.1",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "^8.5.18",
+      "sharp": "^0.35.0"
+    },
+    "@babel/core": "^7.29.7",
+    "ws": "^8.18.0",
+    "minimatch@10": {
+      "brace-expansion": "^5.0.12"
+    },
+    "js-yaml": "^4.1.1"
+  }
+}

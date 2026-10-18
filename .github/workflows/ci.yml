@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: typecheck, lint, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Public-release hygiene
+        run: npm run check:public
+
+      - name: Git-history credential scan
+        run: npm run check:history
+
+      - name: Dependency security audit
+        run: npm audit --audit-level=high
+
+      - name: Lint
+        # Scope lint to files changed by this PR (vs. the merge base) so pre-existing
+        # repo lint does not block every PR. Failures on changed files are still
+        # required to be fixed. Falls back to a full lint if the diff is empty
+        # (e.g. push to main).
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_SHA="origin/${{ github.base_ref }}"
+            git fetch --depth=1 origin "${{ github.base_ref }}"
+            CHANGED=$(git diff --name-only --diff-filter=ACMR "$BASE_SHA"...HEAD -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs' || true)
+            if [ -z "$CHANGED" ]; then
+              echo 'No lintable files changed; skipping lint.'
+              exit 0
+            fi
+            echo "Linting changed files:"
+            echo "$CHANGED"
+            npx eslint --max-warnings=0 $CHANGED
+          else
+            npm run lint
+          fi
+
+      - name: Test
+        run: npm run test:unit
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
+
+      - name: E2E smoke
+        run: npm run test:e2e
