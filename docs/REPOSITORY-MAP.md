@@ -46,7 +46,7 @@ the actual-schema reference.
 
 ## Rules for future sessions
 
-1. Read `AGENTS.md`, `README.md`, and the relevant current product/schema docs.
+1. Read `README.md`, `CONTRIBUTING.md`, and the relevant current product/schema docs.
 2. Capture `git status --short --branch`; preserve existing changes and files.
 3. Trace the requested behavior to its route, domain module, integration, and
    test seam before editing.

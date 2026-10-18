@@ -7,7 +7,7 @@
 //   SUPABASE_SERVICE_ROLE_KEY — auto-injected
 //   RESEND_API_KEY            — Resend API key for email sending
 //   FROM_EMAIL                — sender address (e.g. "Roadsmith <hello@roadsmith.app>")
-//   GROWTH_TIER_URL           — link to upgrade flow (e.g. https://roadsmith.vercel.app/pricing)
+//   GROWTH_TIER_URL           — fully qualified link to the configured upgrade flow
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -110,14 +110,16 @@ Deno.serve(async (req: Request) => {
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const resendApiKey = Deno.env.get("RESEND_API_KEY");
   const fromEmail = Deno.env.get("FROM_EMAIL") || "Roadsmith <hello@roadsmith.app>";
-  const growthTierUrl =
-    Deno.env.get("GROWTH_TIER_URL") || "https://roadsmith.vercel.app/pricing";
+  const growthTierUrl = Deno.env.get("GROWTH_TIER_URL");
 
   if (!supabaseUrl || !serviceRoleKey) {
     return json({ error: "missing Supabase env" }, 500);
   }
   if (!resendApiKey) {
     return json({ error: "missing RESEND_API_KEY" }, 500);
+  }
+  if (!growthTierUrl) {
+    return json({ error: "missing GROWTH_TIER_URL" }, 500);
   }
 
   const supabase = createClient(supabaseUrl, serviceRoleKey, {

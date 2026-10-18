@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-forbidden='(^|/)(\.claude|\.hermes|\.openclaw|\.herenow|\.codex|\.learnings|memory|scout-reports|MEMORY\.md|AGENT_RUN_LOG\.md|WORKFLOW_LOG(\.md|_HEADER\.md)?|TDC_BOOTSTRAP\.md|CLAUDE(_CODEX_CONTEXT)?\.md|prompts)(/|$)'
+forbidden='(^|/)(AGENTS\.md|\.claude|\.hermes|\.openclaw|\.herenow|\.codex|\.learnings|memory|scout-reports|MEMORY\.md|AGENT_RUN_LOG\.md|WORKFLOW_LOG(\.md|_HEADER\.md)?|TDC_BOOTSTRAP\.md|CLAUDE(_CODEX_CONTEXT)?\.md|prompts)(/|$)'
 
 existing_tracked=$(git ls-files | while IFS= read -r path; do test -e "$path" && printf '%s\n' "$path"; done)
 tracked_private=$(printf '%s\n' "$existing_tracked" | rg -n "$forbidden" || true)

@@ -16,4 +16,8 @@ Local development uses `.env.local`, which is ignored and must contain disposabl
 
 ## Demo expectations
 
-The demo must use disposable data and a controlled demo session. It must not expose production students, parents, instructors, booking tokens, Stripe credentials, Resend credentials, or service-role keys. The preferred documented demo hostname is `https://roadsmith-phi.vercel.app/`; its canonical Vercel project association remains a release-gate item.
+The demo must use disposable data and a controlled demo session. It must not
+expose production students, parents, instructors, booking tokens, Stripe
+credentials, Resend credentials, or service-role keys. The supported review
+path is the local operator-review demo documented in [`DEMO.md`](../DEMO.md);
+no hosted demo is required.

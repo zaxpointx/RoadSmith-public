@@ -28,6 +28,6 @@
 - [ ] `npm run build` passes
 - [ ] `npm run lint` passes
 - [ ] `npm run typecheck` passes
-- [ ] I read `AGENTS.md` before starting
+- [ ] I read the README and applicable documentation before starting
 - [ ] No new env vars added without updating `.env.example`
 - [ ] `npm run check:public` passes

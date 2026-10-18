@@ -89,9 +89,10 @@ npm run test:e2e
 
 ## Environments and demo
 
-Local, preview, demo, and production credentials must remain separate. The preferred disposable demo hostname is [roadsmith-phi.vercel.app](https://roadsmith-phi.vercel.app/). Do not enter real student, parent, instructor, school, payment, or booking-token data into the demo.
-
-The canonical Vercel project and hostname are still release-gate decisions. The `roadsmith-ebqr` project is treated as secondary until its role is verified.
+Local, preview, demo, and production credentials must remain separate. The
+reproducible review path is the local operator-review demo in [DEMO.md](DEMO.md);
+no hosted demo is required. Do not enter real student, parent, instructor,
+school, payment, or booking-token data into the demo.
 
 ## Repository layout
 
@@ -106,7 +107,14 @@ public/               Public assets reviewed for release safety
 .github/              CI, issue templates, and pull-request guidance
 ```
 
-For the complete reviewer path, start with [DEMO.md](DEMO.md), then [docs/ENGINEERING-HIGHLIGHTS.md](docs/ENGINEERING-HIGHLIGHTS.md), [docs/INTERNSHIP_REVIEW.md](docs/INTERNSHIP_REVIEW.md), [SPEC.md](SPEC.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/WORKFLOWS.md](docs/WORKFLOWS.md), and [docs/PUBLIC-RELEASE-BOUNDARY.md](docs/PUBLIC-RELEASE-BOUNDARY.md). Historical specifications are retained under `archive/`.
+For the complete reviewer path, start with [DEMO.md](DEMO.md), then
+[docs/ENGINEERING-HIGHLIGHTS.md](docs/ENGINEERING-HIGHLIGHTS.md),
+[docs/INTERNSHIP_REVIEW.md](docs/INTERNSHIP_REVIEW.md),
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md),
+[docs/WORKFLOWS.md](docs/WORKFLOWS.md), and
+[docs/PUBLIC-RELEASE-BOUNDARY.md](docs/PUBLIC-RELEASE-BOUNDARY.md). `SPEC.md`
+and historical specifications are planning context, not a list of completed
+product claims.
 
 ## Contributing and security
 

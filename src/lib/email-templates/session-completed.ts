@@ -11,7 +11,7 @@ export function sessionCompletedEmail({
   schoolName,
   schoolPhone,
   instructorNotes,
-  appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://roadsmith.vercel.app',
+  appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
 }: {
   studentName: string
   parentName: string
