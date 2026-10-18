@@ -1,8 +1,8 @@
-# Roadsmith
+# RoadSmith
 
-Roadsmith is a white-label booking and operations platform for driving schools. It helps a school collect parent-first intake, account for time and travel, route feasible scheduling proposals to an operator for approval, collect payment, confirm bookings, send reminders, handle rescheduling, and record post-lesson notes.
+RoadSmith is a white-label booking and operations platform for driving schools. It helps a school collect parent-first intake, account for time and travel, route feasible scheduling proposals to an operator for approval, collect payment, confirm bookings, send reminders, handle rescheduling, and record post-lesson notes.
 
-> Roadsmith is pre-release software. This public repository is a reviewer-facing release candidate, not a production deployment.
+> RoadSmith is pre-release software. This public repository is a reviewer-facing release candidate, not a production deployment.
 
 ## What it solves
 
