@@ -25,6 +25,8 @@ The operator-approval boundary is intentional: a recommendation is not a confirm
 
 ## Current status
 
+This repository is an internship-review release candidate, not a production-ready deployment.
+
 Implemented areas include the public booking flow, school onboarding, school-admin dashboard, instructors, sessions, calendar, student records, CSV import, Tennessee compliance readiness tracking, demo mode, Stripe integration points, transactional email integration points, and workflow-watchdog tests. Government-form generation and submission remain partial.
 
 Experimental or review-required areas include newer scheduling and payment orchestration, production migration reconciliation, live RLS verification, and the exact canonical Vercel project/hostname relationship. Historical agent-operator migrations remain for reconciliation but are not part of the public runtime. SMS reminders, complete instructor availability management, government-form submission, and production-grade automation are not claimed as complete.
