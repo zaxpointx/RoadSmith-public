@@ -45,6 +45,7 @@
 .rs-text-link { color: #a9a9b5; font-size: 13px; }
 .rs-text-link:hover { color: #fff; }
 .rs-text-link span { margin-left: 5px; color: #c0a7ff; }
+.rs-hosted-note { margin: 17px auto 0; color: #77798a; font: 10px ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .04em; }
 
 .rs-window-shell { position: relative; max-width: 1060px; margin: 100px auto 0; text-align: left; perspective: 1000px; }
 .rs-window-glow { position: absolute; inset: 10% 7% -10%; border-radius: 40%; background: linear-gradient(110deg, rgba(78,100,238,.8), rgba(156,82,231,.7)); filter: blur(48px); opacity: .28; }

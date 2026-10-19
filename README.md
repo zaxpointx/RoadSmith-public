@@ -61,7 +61,18 @@ Hosted schema parity, tenant-isolation verification, dependency remediation, pro
 | Hosting | Vercel |
 | Tests | Node unit tests and Playwright/HTTP smoke checks |
 
-## Local setup
+## Hosted reviewer path
+
+Start here—no install, credentials, or local services are required:
+
+- [Open the verified live homepage](https://roadsmith-phi.vercel.app/)
+- [Open the verified live operator-review demo](https://roadsmith-phi.vercel.app/demo/operator-review)
+
+The hosted operator-review path uses synthetic fixtures and is side-effect-free. It walks through parent intake, a travel-aware candidate lesson, four bounded detectors, evidence review, an owner decision, and an explicitly simulated handoff. It does not send messages, charge cards, change calendars, create bookings, call Maps or other providers, mutate Supabase, or persist production data. Approval and follow-up controls update only local page state and show `sideEffects: []`.
+
+The hosted URL is the current deployed state. This repository change does not update or deploy that hosted page.
+
+## Optional local developer path
 
 Requirements: Node.js 22 or newer, npm, and—when running local Supabase services—Docker.
 
@@ -91,10 +102,11 @@ npm run test:e2e
 
 ## Environments and demo
 
-Local, preview, demo, and production credentials must remain separate. The
-reproducible review path is the local operator-review demo in [DEMO.md](DEMO.md);
-no hosted demo is required. Do not enter real student, parent, instructor,
-school, payment, or booking-token data into the demo.
+Local, preview, demo, and production credentials must remain separate. For
+review, use the hosted path above and [DEMO.md](DEMO.md). Local setup is only
+for developers who need to inspect or change the code. Do not enter real
+student, parent, instructor, school, payment, address, or booking-token data
+into the hosted or local demo.
 
 ## Repository layout
 
