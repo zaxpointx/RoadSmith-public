@@ -76,15 +76,15 @@ export default function OperatorReviewDemoPage() {
         <header className={styles.header}>
           <div>
             <Link className={styles.backLink} href="/">← Roadsmith public release</Link>
-            <div className={styles.eyebrow}>ROADSMITH / OPERATOR REVIEW</div>
+            <div className={styles.eyebrow}>ROADSMITH / HOSTED OPERATOR REVIEW</div>
             <h1>One inquiry. One proposed lesson. One owner decision.</h1>
             <p className={styles.lede}>A local, synthetic walkthrough of what Roadsmith found before anything could be sent, charged, booked, cancelled, or rescheduled.</p>
           </div>
-          <div className={styles.modeBadge}><span /> LOCAL SYNTHETIC DEMO</div>
+          <div className={styles.modeBadge}><span /> HOSTED SYNTHETIC DEMO</div>
         </header>
 
         <aside className={styles.disclosure} role="note">
-          <strong>Read-only local demo.</strong> No messages, payments, calendar changes, bookings, cancellations, or reschedules occur. Every review below has <code>sideEffects: []</code>.
+          <strong>Read-only hosted demo using synthetic fixtures.</strong> No messages, payments, calendar changes, bookings, cancellations, or reschedules occur. Every review below has <code>sideEffects: []</code>; controls update only this page’s local state.
         </aside>
 
         <section className={styles.toolbar} aria-label="Demo controls">

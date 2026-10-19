@@ -4,7 +4,18 @@ This is the fastest way for a reviewer to understand the project. The demo is
 read-only with synthetic fixtures: it does not send messages, charge cards,
 create bookings, mutate Supabase, call Maps, or contact any provider.
 
-## Local setup
+## Start with the hosted demo
+
+No install or credentials are required:
+
+- [Verified live homepage](https://roadsmith-phi.vercel.app/)
+- [Verified live operator-review workflow](https://roadsmith-phi.vercel.app/demo/operator-review)
+
+The hosted page is the current deployed state; this repository change does not
+update or deploy it. Every decision and handoff control is synthetic page
+state, and the review record remains `sideEffects: []`.
+
+## Optional local setup
 
 Requirements: Node.js 22 or newer and npm.
 
