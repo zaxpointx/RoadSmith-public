@@ -1,5 +1,6 @@
 .page { min-height: 100vh; background: #070909; color: #edf4f1; font-family: var(--rs-font-display); padding: 40px 20px 72px; }
 .shell { max-width: 1180px; margin: 0 auto; }
+.backLink { display: inline-block; margin-bottom: 22px; color: #c8ff00; font: 700 10px var(--rs-font-mono); letter-spacing: .08em; text-transform: uppercase; }.backLink:hover { color: #efff9b; }
 .header { display: flex; justify-content: space-between; gap: 32px; align-items: flex-start; padding: 36px 0 28px; }
 .eyebrow, .kicker, .label, .severity { color: #9cadb2; font: 700 10px/1.2 var(--rs-font-mono); letter-spacing: .12em; text-transform: uppercase; }
 .header h1 { max-width: 760px; margin: 14px 0 12px; font-size: clamp(2.3rem, 5vw, 4.7rem); line-height: .98; letter-spacing: -.055em; font-weight: 600; }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import Link from 'next/link'
 import {
   happyPathEvents,
   runBookingOperatorDemo,
@@ -74,6 +75,7 @@ export default function OperatorReviewDemoPage() {
       <div className={styles.shell}>
         <header className={styles.header}>
           <div>
+            <Link className={styles.backLink} href="/">← Roadsmith public release</Link>
             <div className={styles.eyebrow}>ROADSMITH / OPERATOR REVIEW</div>
             <h1>One inquiry. One proposed lesson. One owner decision.</h1>
             <p className={styles.lede}>A local, synthetic walkthrough of what Roadsmith found before anything could be sent, charged, booked, cancelled, or rescheduled.</p>
