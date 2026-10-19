@@ -13,12 +13,15 @@ work without treating a pre-release project as a production deployment.
    its simulated-versus-real boundary.
 3. [`ENGINEERING-HIGHLIGHTS.md`](ENGINEERING-HIGHLIGHTS.md) — the main design
    decisions and the questions they raise.
-4. [`ARCHITECTURE.md`](ARCHITECTURE.md) — runtime modules and integration seams.
-5. [`REPOSITORY-MAP.md`](REPOSITORY-MAP.md) — where product behavior and tests
+4. [`research/HIT-HD-ROADSMITH.md`](research/HIT-HD-ROADSMITH.md) — the
+   carefully bounded research-to-implementation connection and exact code/test
+   evidence.
+5. [`ARCHITECTURE.md`](ARCHITECTURE.md) — runtime modules and integration seams.
+6. [`REPOSITORY-MAP.md`](REPOSITORY-MAP.md) — where product behavior and tests
    live.
-6. [`../ACTUAL_SCHEMA.md`](../ACTUAL_SCHEMA.md) — application-facing schema
+7. [`../ACTUAL_SCHEMA.md`](../ACTUAL_SCHEMA.md) — application-facing schema
    reference.
-7. [`PUBLIC-RELEASE-BOUNDARY.md`](PUBLIC-RELEASE-BOUNDARY.md) — what is in the
+8. [`PUBLIC-RELEASE-BOUNDARY.md`](PUBLIC-RELEASE-BOUNDARY.md) — what is in the
    public review surface and what remains release-gated.
 
 ## Repository inventory

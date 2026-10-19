@@ -55,6 +55,8 @@ scout-reports/
 memory/
 prompts/
 research/
+!docs/research/
+!docs/research/**
 research-private/
 private-release-archive/
 
