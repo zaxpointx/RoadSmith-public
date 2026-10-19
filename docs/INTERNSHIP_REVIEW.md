@@ -13,6 +13,9 @@ work without treating a pre-release project as a production deployment.
    its simulated-versus-real boundary.
 3. [`ENGINEERING-HIGHLIGHTS.md`](ENGINEERING-HIGHLIGHTS.md) — the main design
    decisions and the questions they raise.
+
+
+
 4. [`ARCHITECTURE.md`](ARCHITECTURE.md) — runtime modules and integration seams.
 5. [`REPOSITORY-MAP.md`](REPOSITORY-MAP.md) — where product behavior and tests
    live.
