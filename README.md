@@ -35,6 +35,8 @@ Implemented areas include the public booking flow, school onboarding, school-adm
 
 The operator-review demo runs against synthetic fixtures, evaluates four safety detectors, records an approval decision, and produces no external side effects. See [DEMO.md](DEMO.md) for the five-minute path.
 
+The reviewer story is intentionally ordered as: parent inquiry → travel-aware lesson proposal → evidence review → owner decision → explicitly simulated handoff. The homepage links directly into that walkthrough at `/demo`.
+
 ### Experimental
 
 Newer scheduling and payment orchestration, production migration reconciliation, live RLS verification, and the exact canonical Vercel project/hostname relationship require review.

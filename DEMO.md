@@ -19,12 +19,22 @@ No real credentials are required for the synthetic operator-review flow.
 
 ## Five-minute walkthrough
 
-1. Open the operator-review page.
-2. Review the normalized parent inquiry and proposed lesson slot.
-3. Inspect the four detector results: travel conflict, duplicate booking,
+1. Open the operator-review page from the homepage, or go directly to the
+   route above.
+2. Review the normalized parent inquiry: student, pickup location, and
+   availability.
+3. Review the travel-aware proposed lesson. It is a candidate slot, never a
+   booking or confirmation.
+4. Inspect the four detector results: travel conflict, duplicate booking,
    payment stall, and unexpected booking state.
-4. Review the evidence attached to each result.
-5. Confirm that the simulated owner approval records a decision while the
+5. Review the evidence attached to each result, including any missing
+   information and the payment-stall warning.
+6. Choose an owner decision. Approval, rejection, dismissal, needs-information,
+   and override are all local review outcomes.
+7. Inspect the explicitly simulated handoff: payment and booking remain
+   unwritten, reminders are only queued in local UI state, and post-lesson notes
+   are saved only in the page state.
+8. Confirm that the simulated owner approval records a decision while the
    side-effects list remains empty.
 
 The command-line equivalent is:
