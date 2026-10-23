@@ -34,9 +34,6 @@ export default function OperatorReviewDemoPage() {
   const [scenario, setScenario] = useState<'reviewable' | 'incomplete'>('reviewable')
   const [outcome, setOutcome] = useState<ReviewOutcome | null>(null)
   const [overrideNote, setOverrideNote] = useState('')
-  const [reminderQueued, setReminderQueued] = useState(false)
-  const [lessonNote, setLessonNote] = useState('Sam handled the neighborhood turns well; practice lane changes next lesson.')
-  const [noteSaved, setNoteSaved] = useState(false)
   const [error, setError] = useState('')
 
   const run = useMemo(() => {
@@ -64,8 +61,6 @@ export default function OperatorReviewDemoPage() {
   function changeScenario(nextScenario: 'reviewable' | 'incomplete') {
     setScenario(nextScenario)
     setOutcome(null)
-    setReminderQueued(false)
-    setNoteSaved(false)
     setError('')
   }
 
@@ -143,26 +138,15 @@ export default function OperatorReviewDemoPage() {
             ))}
           </div>
           {paymentWarning?.result === 'warning' && <div className={styles.paymentCallout}><strong>Payment-stall warning</strong> The synthetic booking is still pending while payment is pending. This is a reason for owner attention, not a payment attempt or Stripe observation.</div>}
-          {recommendation.missingEvidence.length > 0 && <div className={styles.missingSummary}><strong>Missing information</strong><span>{recommendation.missingEvidence.join(' · ')}</span><p>Roadsmith is asking for information instead of guessing.</p></div>}
         </details>
+        {recommendation.missingEvidence.length > 0 && <div className={styles.missingSummary}><strong>Needs information before a proposal can be trusted</strong><span>{recommendation.missingEvidence.join(' · ')}</span><p>Roadsmith is asking for information instead of guessing.</p></div>}
 
         <section className={styles.card}>
           <div className={styles.cardHeading}><div><span className={styles.kicker}>04 / OWNER DECISION</span><h2>Nothing moves without approval</h2></div><span className={styles.fixture}>page-only simulation</span></div>
-          <div className={styles.handoffGrid}>
-            <article className={`${styles.handoffStep} ${outcome === 'approve' || outcome === 'override' ? styles.handoffReady : ''}`}>
-              <span className={styles.handoffNumber}>01</span><div><strong>Owner approval</strong><p>{outcome === 'approve' ? 'Approved locally by demo-owner.' : outcome === 'override' ? 'Exception accepted with an owner note.' : 'Waiting for the owner decision above.'}</p></div><span className={styles.statePill}>{outcome === 'approve' || outcome === 'override' ? 'approved' : 'awaiting'}</span>
-            </article>
-            <article className={`${styles.handoffStep} ${outcome === 'approve' || outcome === 'override' ? styles.handoffReady : ''}`}>
-              <span className={styles.handoffNumber}>02</span><div><strong>Payment and booking</strong><p>{outcome === 'approve' || outcome === 'override' ? 'Still simulated. No charge or booking is created.' : 'The proposal stays on hold. No charge or booking exists.'}</p></div><span className={styles.statePill}>{outcome === 'approve' || outcome === 'override' ? 'simulated' : 'on hold'}</span>
-            </article>
-            <article className={`${styles.handoffStep} ${reminderQueued ? styles.handoffReady : ''}`}>
-              <span className={styles.handoffNumber}>03</span><div><strong>Reminder state</strong><p>{reminderQueued ? 'Reminder queued in local UI; no message provider was called.' : 'No reminder queued until the operator chooses to simulate it.'}</p></div><button className={styles.inlineAction} type="button" onClick={() => setReminderQueued(true)} disabled={!outcome || outcome === 'reject' || outcome === 'dismiss' || outcome === 'needs_information'}>{reminderQueued ? 'Queued locally' : 'Simulate reminder'}</button>
-            </article>
-            <article className={`${styles.handoffStep} ${noteSaved ? styles.handoffReady : ''}`}>
-              <span className={styles.handoffNumber}>04</span><div><strong>Post-lesson note</strong><p>{noteSaved ? 'Note saved to local demo state.' : 'Draft a follow-up note without persisting it.'}</p><textarea className={styles.lessonNote} value={lessonNote} onChange={(event) => { setLessonNote(event.target.value); setNoteSaved(false) }} aria-label="Synthetic post-lesson note" /></div><button className={styles.inlineAction} type="button" onClick={() => setNoteSaved(true)}>{noteSaved ? 'Saved locally' : 'Save local note'}</button>
-            </article>
+          <div className={styles.decisionState} role="status">
+            <strong>{run.review ? `Owner decision: ${run.review.outcome}` : 'Waiting for the owner decision'}</strong>
+            <span>{run.review ? 'Recorded in temporary page state. Side effects: [] — nothing was charged, booked, sent, cancelled, rescheduled, or persisted.' : 'The proposal remains a proposal until the owner chooses an outcome.'}</span>
           </div>
-          <p className={styles.handoffDisclosure}>Every control on this page updates temporary browser state only. It never calls a payment, calendar, messaging, database, or booking provider.</p>
         </section>
 
         <section className={styles.reviewSection}>
@@ -172,7 +156,7 @@ export default function OperatorReviewDemoPage() {
           </div>
           <label className={styles.noteField}>Override note <textarea value={overrideNote} onChange={(event) => setOverrideNote(event.target.value)} placeholder="Required only for override" rows={2} /></label>
           {error && <p className={styles.error}>{error}</p>}
-          {run.review && <div className={styles.reviewRecord}><div><span className={styles.kicker}>DECISION RECORDED IN THIS DEMO</span><strong>{run.review.outcome} · owner decision</strong></div><span className={styles.sideEffects}>nothing sent</span><p>{run.review.note || 'The proposal was reviewed without creating a booking or payment.'}</p></div>}
+          {run.review && <div className={styles.reviewRecord}><div><span className={styles.kicker}>DECISION RECORDED IN THIS DEMO</span><strong>{run.review.outcome} · owner decision</strong></div><span className={styles.sideEffects}>side effects: []</span><p>{run.review.note || 'The proposal was reviewed without creating a booking or payment.'}</p></div>}
         </section>
       </div>
         <footer className={styles.footer}>Synthetic walkthrough · no network provider, database, credential, persistence, or production navigation is used by this route.</footer>
