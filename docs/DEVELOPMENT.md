@@ -33,6 +33,7 @@ Use disposable development credentials only, and never commit `.env.local`.
 | `npm run check:docs` | Fails on broken relative links in tracked Markdown files |
 | `npm run check:history` | Scans Git history for credential-shaped values |
 | `npm run check:dependencies` | Development-dependency security monitor |
+| `npm audit --omit=dev --audit-level=high` | Runtime dependency audit (CI release gate) |
 | `npm run verify:completion` | Completion verifier (`scripts/reliability/`) |
 
 ## Environment variables

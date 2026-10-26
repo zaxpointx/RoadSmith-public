@@ -17,10 +17,10 @@ state, and the review record remains `sideEffects: []`.
 
 ## Optional local setup
 
-Requirements: Node.js 22 or newer and npm.
+Requirements: Node.js 22.6 or newer and npm.
 
 ```bash
-npm install
+npm ci
 cp .env.example .env.local
 npm run dev
 ```

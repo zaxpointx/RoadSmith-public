@@ -74,7 +74,7 @@ The hosted URL is the current deployed state. This repository change does not up
 
 ## Optional local developer path
 
-Requirements: Node.js 22 or newer, npm, and Docker only when running local Supabase services.
+Requirements: Node.js 22.6 or newer, npm, and Docker only when running local Supabase services.
 
 ```bash
 npm ci

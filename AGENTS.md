@@ -34,7 +34,7 @@ Lint, typecheck, unit tests, and build need no env values.
     npm run test:e2e        # Playwright; run `npx playwright install chromium` once
 If you can't run a check, say so. A test command that finds zero tests is a failure.
 
-## Adding an API route
+## Adding an API route (details: docs/ARCHITECTURE.md)
 Route handlers live in `src/app/api/<name>/route.ts` (App Router). Put business logic in
 `src/lib/`, validate input, keep school (tenant) scoping explicit, and add a unit test in
 `tests/unit/`. `src/app/api/contact/route.ts` with `tests/unit/contact.test.mjs` is a small example.
