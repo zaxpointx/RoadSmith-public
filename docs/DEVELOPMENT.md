@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Node.js 22 or newer (CI uses Node 22). Unit tests use `--experimental-strip-types`, which older Node versions lack.
+- Node.js 22.6 or newer (`engines` in package.json; CI uses Node 22). Unit tests use `--experimental-strip-types`, which older Node versions lack.
 - npm. The lockfile is `package-lock.json`; use `npm ci` for reproducible installs.
 - Docker only if you run local Supabase services. It is not needed for lint, typecheck, tests, or build.
 
@@ -30,6 +30,7 @@ Use disposable development credentials only, and never commit `.env.local`.
 | `npm test` / `npm run test:unit` | Node test runner over `tests/unit/*.test.mjs` |
 | `npm run test:e2e` | Playwright smoke tests in `e2e/` (starts its own server) |
 | `npm run check:public` | Public-release hygiene scan (private paths, env files, credential-shaped values) |
+| `npm run check:docs` | Fails on broken relative links in tracked Markdown files |
 | `npm run check:history` | Scans Git history for credential-shaped values |
 | `npm run check:dependencies` | Development-dependency security monitor |
 | `npm run verify:completion` | Completion verifier (`scripts/reliability/`) |

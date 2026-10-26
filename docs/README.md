@@ -9,6 +9,7 @@ index to find the current authority for a question.
 2. [`../CONTRIBUTING.md`](../CONTRIBUTING.md) — contribution and verification workflow.
 3. [`INTERNSHIP_REVIEW.md`](INTERNSHIP_REVIEW.md) — reviewer reading path, inventory, sanitization record, and unresolved decisions.
 4. [`REPOSITORY-MAP.md`](REPOSITORY-MAP.md) — current repository map.
+5. [`../AGENTS.md`](../AGENTS.md) — short guide for coding agents (setup, checks, where code goes).
 
 ## Engineering guides
 

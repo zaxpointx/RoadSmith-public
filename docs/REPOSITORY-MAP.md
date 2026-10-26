@@ -35,7 +35,7 @@ the actual-schema reference.
 
 - Unit tests live in `tests/unit/`; browser tests live in `e2e/`.
 - Repository checks are exposed through `package.json`: lint, typecheck, unit,
-  E2E, build, public-tree, history, migration metadata, and completion checks.
+  E2E, build, public-tree, history, docs-link, dependency, and completion checks.
 - `docs/INTERNSHIP_REVIEW.md` defines the reviewer reading path and unresolved
   decisions.
 - `docs/SPEC-TEMPLATE.md`, `docs/TASK-CONTRACT-TEMPLATE.md`, and
@@ -55,6 +55,4 @@ the actual-schema reference.
 5. Stop for approval before hosted changes, production data, migrations,
    credentials, billing, repository visibility, history changes, or deletion.
 
-For unresolved release and ownership decisions, see the release-boundary and
-current review notes in [`CHANGE-REVIEW-2026-10-10.md`](CHANGE-REVIEW-2026-10-10.md)
-and [`PUBLIC-RELEASE-BOUNDARY.md`](PUBLIC-RELEASE-BOUNDARY.md).
+For unresolved release and ownership decisions, see [`PUBLIC-RELEASE-BOUNDARY.md`](PUBLIC-RELEASE-BOUNDARY.md).

@@ -14,7 +14,8 @@
     "check:history": "bash scripts/verify-git-history.sh",
     "check:dependencies": "node scripts/reliability/dependency-security-check.mjs",
     "verify:completion": "node scripts/reliability/completion-verifier.mjs",
-    "test": "npm run test:unit"
+    "test": "npm run test:unit",
+    "check:docs": "node scripts/check-docs-links.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "^9.6.1",
@@ -23,7 +24,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.17.0",
-    "next": "16.4.0",
+    "next": "16.4.2",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "stripe": "^22.0.2",
@@ -38,7 +39,7 @@
     "@types/react-dom": "^19",
     "@types/three": "^0.184.1",
     "eslint": "^9",
-    "eslint-config-next": "16.4.0",
+    "eslint-config-next": "16.4.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
@@ -53,5 +54,8 @@
       "brace-expansion": "^5.0.12"
     },
     "js-yaml": "^4.1.1"
+  },
+  "engines": {
+    "node": ">=22.6"
   }
 }

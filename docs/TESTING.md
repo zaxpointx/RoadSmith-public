@@ -10,6 +10,7 @@ These match `.github/workflows/ci.yml`:
 npm ci
 npm run typecheck
 npm run check:public                      # public-release hygiene scan
+npm run check:docs                        # broken relative links in Markdown docs
 npm run check:history                     # credential scan of Git history
 npm audit --omit=dev --audit-level=high   # runtime dependencies only
 npm run check:dependencies                # development-dependency monitor
