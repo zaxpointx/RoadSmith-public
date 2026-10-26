@@ -28,3 +28,33 @@ Customer data, service-role access, payment secrets, provider state, internal
 agent operations, and production-only routes are outside the public review
 surface. See `SECURITY.md` and `docs/PUBLIC-RELEASE-BOUNDARY.md` for the
 documented release boundary and unresolved verification items.
+
+## System diagram
+
+```mermaid
+flowchart TB
+  U[Parents, students, school operators, instructors] -->|HTTPS| V
+  subgraph V[Next.js app on Vercel]
+    MW[src/middleware.ts auth guard] --> APP[App Router pages, src/app]
+    APP --> API[Route handlers, src/app/api]
+  end
+  API -->|server-side clients| SB[(Supabase: Postgres, Auth, RLS)]
+  MW -->|session check| SB
+  API -->|Checkout, subscriptions| ST[Stripe]
+  ST -->|signed webhook| API
+  API -->|REST| RS[Resend email]
+  API -->|OAuth| GC[Google Calendar]
+```
+
+## Code layout
+
+| Path | Contents |
+| --- | --- |
+| `src/app/` | Pages: marketing (`/`, `/pricing`, `/faq`, `/contact`, `/legal`), booking (`/book`, `/school/[slug]`), `/school-admin`, `/instructor`, `/onboarding`, `/demo`, auth pages |
+| `src/app/api/` | Route handlers: bookings, sessions, slots, students, instructors, schools, school-admin, import, notify, reminders, checkout, stripe, webhooks, demo, auth |
+| `src/components/` | UI grouped by surface: `admin`, `auth`, `dashboard`, `marketing`, `onboarding`, `ui` |
+| `src/lib/` | Domain logic: Supabase clients, compliance, school-admin, onboarding, workflow watchdog, email, security, validation, booking lifecycle |
+| `src/middleware.ts` | Guards `/school-admin` and `/instructor` routes |
+| `supabase/` | Migrations, edge function, SQL scripts (see [DATABASE.md](DATABASE.md)) |
+| `tests/unit/`, `e2e/` | Node unit tests and Playwright smoke tests (see [TESTING.md](TESTING.md)) |
+| `scripts/` | Verification and maintenance scripts |
