@@ -58,3 +58,20 @@ flowchart TB
 | `supabase/` | Migrations, edge function, SQL scripts (see [DATABASE.md](DATABASE.md)) |
 | `tests/unit/`, `e2e/` | Node unit tests and Playwright smoke tests (see [TESTING.md](TESTING.md)) |
 | `scripts/` | Verification and maintenance scripts |
+
+## Adding an API route
+
+1. Create `src/app/api/<area>/route.ts` (or `<area>/[id]/route.ts` for a dynamic segment) and export one
+   async function per HTTP method (`GET`, `POST`, ...). Group it with the existing area in
+   [REPOSITORY-MAP.md](REPOSITORY-MAP.md) when one fits.
+2. Parse and validate the body server-side; return `NextResponse.json({ error }, { status: 400 })` on bad
+   input and a generic message on failure. Keep pure validation in `src/lib/` so it can be unit tested.
+   `src/app/api/contact/route.ts` with `src/lib/contact.ts` is the smallest complete example.
+3. Authenticated school-admin routes call `resolveSchoolAdminContext(request)` from
+   `src/lib/school-admin/auth.ts` and return 401 when it is null. Scope every query by that context's
+   school id. Use the server Supabase client in `src/lib/supabase/server.ts`; check columns in
+   `ACTUAL_SCHEMA.md` first.
+4. New `process.env.X` reads go into `.env.example` in the same PR.
+5. Add a unit test in `tests/unit/<name>.test.mjs` for the `src/lib/` logic (see `tests/unit/contact.test.mjs`),
+   plus authorized, unauthorized and cross-school cases for tenant data. Then run the checks in
+   [TESTING.md](TESTING.md).
