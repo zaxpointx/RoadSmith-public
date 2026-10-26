@@ -33,7 +33,7 @@ if [[ -n "$nested_agents" ]]; then
   echo "$nested_agents"
   exit 1
 fi
-if [[ -f AGENTS.md ]] && rg -n -i "hermes|mac ?mini|tailscale|vercel\.app|supabase\.co|private repo|~/" AGENTS.md; then
+if [[ -f AGENTS.md ]] && rg -n -i "hermes|mac ?mini|tailscale|vercel\.app|supabase\.co|private repo|~/|evswdlsql|@gmail\.com|@outlook\.com|/Users/|Projects/|roadsmith-(ebqr|public-hosted)|price_1|sk_(live|test)_|ghp_|github_pat_" AGENTS.md; then
   echo "AGENTS.md mentions private infrastructure or hosted identifiers."
   exit 1
 fi
