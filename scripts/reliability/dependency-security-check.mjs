@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 
-const expected = new Set(["@next/eslint-plugin-next", "braces", "eslint-config-next", "fast-glob", "micromatch"]);
+const expected = new Set([]); // No accepted findings since 2026-10-26 (Next 16.4.2 upgrade). Add one here only with a dated note in docs/DEPENDENCY-SECURITY-MONITORING.md.
 const lock = JSON.parse(readFileSync("package-lock.json", "utf8"));
 const audit = spawnSync("npm", ["audit", "--json"], { encoding: "utf8" });
 
@@ -26,5 +26,5 @@ if (unexpected.length || production.length || missing.length) {
   process.exit(1);
 }
 
-console.log("Accepted external debt: the exact known findings are development-only tooling findings in the Next ESLint chain.");
+console.log(expected.size ? "Only the documented accepted findings are present." : "No dependency audit findings.");
 console.log("This check fails when the finding set changes or a production dependency becomes affected; it does not suppress npm audit output.");

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-forbidden='(^|/)(AGENTS\.md|\.claude|\.hermes|\.openclaw|\.herenow|\.codex|\.learnings|memory|scout-reports|MEMORY\.md|AGENT_RUN_LOG\.md|WORKFLOW_LOG(\.md|_HEADER\.md)?|TDC_BOOTSTRAP\.md|CLAUDE(_CODEX_CONTEXT)?\.md|prompts)(/|$)'
+forbidden='(^|/)(\.claude|\.hermes|\.openclaw|\.herenow|\.codex|\.learnings|memory|scout-reports|MEMORY\.md|AGENT_RUN_LOG\.md|WORKFLOW_LOG(\.md|_HEADER\.md)?|TDC_BOOTSTRAP\.md|CLAUDE(_CODEX_CONTEXT)?\.md|prompts)(/|$)'
 
 existing_tracked=$(git ls-files | while IFS= read -r path; do test -e "$path" && printf '%s\n' "$path"; done)
 tracked_private=$(printf '%s\n' "$existing_tracked" | rg -n "$forbidden" || true)
@@ -26,8 +26,28 @@ if [[ -n "$filesystem_private" ]]; then
   exit 1
 fi
 
+# Only a root AGENTS.md (public contributor guide) is allowed, and it must stay free of private context.
+nested_agents=$(git ls-files | rg "/AGENTS\.md$" || true)
+if [[ -n "$nested_agents" ]]; then
+  echo "Only a root AGENTS.md is allowed:"
+  echo "$nested_agents"
+  exit 1
+fi
+if [[ -f AGENTS.md ]] && rg -n -i "hermes|mac ?mini|tailscale|vercel\.app|supabase\.co|private repo|~/|evswdlsql|@gmail\.com|@outlook\.com|/Users/|Projects/|roadsmith-(ebqr|public-hosted)|price_1|sk_(live|test)_|ghp_|github_pat_" AGENTS.md; then
+  echo "AGENTS.md mentions private infrastructure or hosted identifiers."
+  exit 1
+fi
+
 if git ls-files --error-unmatch .env.local >/dev/null 2>&1; then
   echo '.env.local is tracked.'
+  exit 1
+fi
+
+# Hosted-project identifiers must not appear anywhere in the public tree.
+hosted_ids=$(git grep -n -I -E "evswdlsql|price_1[A-Za-z0-9]{8,}" -- ":!scripts/verify-public-release.sh" ":!package-lock.json" || true)
+if [[ -n "$hosted_ids" ]]; then
+  echo "Hosted-project identifiers found in tracked files:"
+  echo "$hosted_ids"
   exit 1
 fi
 

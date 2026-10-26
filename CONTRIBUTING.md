@@ -11,19 +11,7 @@ Roadsmith is a white-label operations platform for driving schools. Contribution
 
 ## Verification
 
-Run the checks relevant to the change. For application or repository-boundary changes, run:
-
-```bash
-npm run lint
-npm run typecheck
-npm run test:unit
-npm run test:e2e
-npm run build
-npm run check:public
-npm audit --omit=dev --audit-level=high
-npm run check:dependencies
-git diff --check
-```
+Run the required checks in [docs/TESTING.md](docs/TESTING.md). It is the same list CI runs.
 
 The production audit must pass without high-severity findings. The separate
 development-dependency monitor records the currently known Next ESLint-chain
