@@ -31,6 +31,7 @@ Lint, typecheck, unit tests, and build need no env values.
     npm run check:history   # credential scan of Git history
     npm run check:docs      # broken relative links in Markdown
     npm run check:dependencies
+    npm audit --omit=dev --audit-level=high
     npm run test:e2e        # Playwright; run `npx playwright install chromium` once
 If you can't run a check, say so. A test command that finds zero tests is a failure.
 
