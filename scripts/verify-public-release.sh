@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-forbidden='(^|/)(AGENTS\.md|\.claude|\.hermes|\.openclaw|\.herenow|\.codex|\.learnings|memory|scout-reports|MEMORY\.md|AGENT_RUN_LOG\.md|WORKFLOW_LOG(\.md|_HEADER\.md)?|TDC_BOOTSTRAP\.md|CLAUDE(_CODEX_CONTEXT)?\.md|prompts)(/|$)'
+forbidden='(^|/)(\.claude|\.hermes|\.openclaw|\.herenow|\.codex|\.learnings|memory|scout-reports|MEMORY\.md|AGENT_RUN_LOG\.md|WORKFLOW_LOG(\.md|_HEADER\.md)?|TDC_BOOTSTRAP\.md|CLAUDE(_CODEX_CONTEXT)?\.md|prompts)(/|$)'
 
 existing_tracked=$(git ls-files | while IFS= read -r path; do test -e "$path" && printf '%s\n' "$path"; done)
 tracked_private=$(printf '%s\n' "$existing_tracked" | rg -n "$forbidden" || true)
@@ -23,6 +23,18 @@ filesystem_private=$(printf '%s\n' "$filesystem_paths" | rg -n "$forbidden" || t
 if [[ -n "$filesystem_private" ]]; then
   echo "Private or agent-only paths found in the repository tree:"
   echo "$filesystem_private"
+  exit 1
+fi
+
+# Only a root AGENTS.md (public contributor guide) is allowed, and it must stay free of private context.
+nested_agents=$(git ls-files | rg "/AGENTS\.md$" || true)
+if [[ -n "$nested_agents" ]]; then
+  echo "Only a root AGENTS.md is allowed:"
+  echo "$nested_agents"
+  exit 1
+fi
+if [[ -f AGENTS.md ]] && rg -n -i "hermes|mac ?mini|tailscale|vercel\.app|supabase\.co|private repo|~/" AGENTS.md; then
+  echo "AGENTS.md mentions private infrastructure or hosted identifiers."
   exit 1
 fi
 

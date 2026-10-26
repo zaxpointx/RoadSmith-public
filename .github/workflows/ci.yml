@@ -36,10 +36,12 @@ jobs:
       - name: Git-history credential scan
         run: npm run check:history
 
+      - name: Docs link check
+        run: npm run check:docs
+
       - name: Dependency security audit
-        # Production dependencies must have no high-severity findings. The
-        # development-only Next ESLint chain is monitored separately below;
-        # npm currently offers only an incompatible downgrade for that chain.
+        # Production dependencies must have no high-severity findings.
+        # check:dependencies below fails on any finding not explicitly accepted.
         run: npm audit --omit=dev --audit-level=high
 
       - name: Development dependency security monitor
