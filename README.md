@@ -74,31 +74,19 @@ The hosted URL is the current deployed state. This repository change does not up
 
 ## Optional local developer path
 
-Requirements: Node.js 22 or newer, npm, and—when running local Supabase services—Docker.
+Requirements: Node.js 22 or newer, npm, and Docker only when running local Supabase services.
 
 ```bash
-npm install
-cp .env.example .env.local
-npm run dev
+npm ci
+cp .env.example .env.local   # variable names only; fill with development values if needed
+npm run dev                  # http://localhost:3000
 ```
 
-Open `http://localhost:3000`. Put only disposable or approved development credentials in `.env.local`; never commit it. The safe variable names and placeholders are documented in `.env.example`.
+Put only disposable development credentials in `.env.local`; never commit it.
 
-Useful checks:
+Required checks are listed once in [docs/TESTING.md](docs/TESTING.md) and match CI. Scripts and environment variable groups are in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
-```bash
-npm run lint
-npm run typecheck
-npm run test:unit
-npm run build
-npm run check:public
-```
-
-The end-to-end smoke runner requires a controlled local server and is not a production test:
-
-```bash
-npm run test:e2e
-```
+**Engineering docs:** [Index](docs/README.md) · [Architecture](docs/ARCHITECTURE.md) · [Development](docs/DEVELOPMENT.md) · [Testing](docs/TESTING.md) · [Deployment](docs/DEPLOYMENT.md) · [Database](docs/DATABASE.md) · [Decisions](docs/DECISIONS.md)
 
 ## Environments and demo
 
