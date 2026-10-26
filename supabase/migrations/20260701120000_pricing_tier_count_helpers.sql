@@ -2,7 +2,6 @@
 -- Purpose: track active student/instructor count per school for the
 -- Growth tier auto-trigger (Roadsmith pricing band decision 2026-07-01).
 --
--- Author: Hermes (auto-research session)
 -- Idempotent: yes (CREATE OR REPLACE)
 -- Depends on: students table (active boolean), instructors table (or equivalent)
 --
