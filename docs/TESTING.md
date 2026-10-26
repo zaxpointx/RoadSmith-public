@@ -22,7 +22,7 @@ npm run test:e2e
 git diff --check
 ```
 
-None of these need real environment values. CI builds with placeholder Supabase values.
+None of the required checks need real environment values (the optional booking E2E does; see below). CI builds with placeholder Supabase values.
 
 ## Unit tests
 
