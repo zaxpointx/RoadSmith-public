@@ -43,6 +43,14 @@ if git ls-files --error-unmatch .env.local >/dev/null 2>&1; then
   exit 1
 fi
 
+# Hosted-project identifiers must not appear anywhere in the public tree.
+hosted_ids=$(git grep -n -I -E "evswdlsql|price_1[A-Za-z0-9]{8,}" -- ":!scripts/verify-public-release.sh" ":!package-lock.json" || true)
+if [[ -n "$hosted_ids" ]]; then
+  echo "Hosted-project identifiers found in tracked files:"
+  echo "$hosted_ids"
+  exit 1
+fi
+
 credential_matches=$(git grep -n -I -E 'sk_(live|test)_[A-Za-z0-9]+|rk_(live|test)_[A-Za-z0-9]+|whsec_[A-Za-z0-9]+|re_[A-Za-z0-9]{20,}' -- ':!package-lock.json' ':!*.lock' || true)
 if [[ -n "$credential_matches" ]]; then
   echo 'Credential-shaped values found in tracked files:'
