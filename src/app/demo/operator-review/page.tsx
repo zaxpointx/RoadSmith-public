@@ -1,7 +1,6 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import Link from 'next/link'
 import {
   happyPathEvents,
   runBookingOperatorDemo,
@@ -35,9 +34,6 @@ export default function OperatorReviewDemoPage() {
   const [scenario, setScenario] = useState<'reviewable' | 'incomplete'>('reviewable')
   const [outcome, setOutcome] = useState<ReviewOutcome | null>(null)
   const [overrideNote, setOverrideNote] = useState('')
-  const [reminderQueued, setReminderQueued] = useState(false)
-  const [lessonNote, setLessonNote] = useState('Sam handled the neighborhood turns well; practice lane changes next lesson.')
-  const [noteSaved, setNoteSaved] = useState(false)
   const [error, setError] = useState('')
 
   const run = useMemo(() => {
@@ -65,8 +61,6 @@ export default function OperatorReviewDemoPage() {
   function changeScenario(nextScenario: 'reviewable' | 'incomplete') {
     setScenario(nextScenario)
     setOutcome(null)
-    setReminderQueued(false)
-    setNoteSaved(false)
     setError('')
   }
 
@@ -75,35 +69,34 @@ export default function OperatorReviewDemoPage() {
       <div className={styles.shell}>
         <header className={styles.header}>
           <div>
-            <Link className={styles.backLink} href="/">← Roadsmith public release</Link>
-            <div className={styles.eyebrow}>ROADSMITH / HOSTED OPERATOR REVIEW</div>
+            <div className={styles.eyebrow}>ROADSMITH / OPERATOR REVIEW</div>
             <h1>One inquiry. One proposed lesson. One owner decision.</h1>
-            <p className={styles.lede}>A local, synthetic walkthrough of what Roadsmith found before anything could be sent, charged, booked, cancelled, or rescheduled.</p>
+            <p className={styles.lede}>A guided, synthetic walkthrough of the moment Roadsmith helps an owner decide whether a parent inquiry is ready for a lesson proposal.</p>
           </div>
-          <div className={styles.modeBadge}><span /> HOSTED SYNTHETIC DEMO</div>
+          <div className={styles.modeBadge}><span /> SYNTHETIC · NO SIDE EFFECTS</div>
         </header>
 
         <aside className={styles.disclosure} role="note">
-          <strong>Read-only hosted demo using synthetic fixtures.</strong> No messages, payments, calendar changes, bookings, cancellations, or reschedules occur. Every review below has <code>sideEffects: []</code>; controls update only this page’s local state.
+          <strong>Reviewer note.</strong> This walkthrough uses made-up data. Nothing is sent, charged, booked, cancelled, or rescheduled. The owner decision is simulated in this page only.
         </aside>
 
         <section className={styles.toolbar} aria-label="Demo controls">
           <div>
-            <span className={styles.label}>Scenario</span>
+            <span className={styles.label}>Try the two paths</span>
             <div className={styles.segmented}>
-              <button className={scenario === 'reviewable' ? styles.selected : ''} onClick={() => changeScenario('reviewable')}>Reviewable candidate</button>
-              <button className={scenario === 'incomplete' ? styles.selected : ''} onClick={() => changeScenario('incomplete')}>Incomplete evidence</button>
+              <button className={scenario === 'reviewable' ? styles.selected : ''} onClick={() => changeScenario('reviewable')}>Enough to review</button>
+              <button className={scenario === 'incomplete' ? styles.selected : ''} onClick={() => changeScenario('incomplete')}>Needs information</button>
             </div>
           </div>
           <div className={styles.stateSummary}>
-            <span className={styles.label}>Current normalized state</span>
-            <strong className={recommendation.normalizedState === 'needs_information' ? styles.warningText : ''}>{recommendation.normalizedState}</strong>
+            <span className={styles.label}>What the owner sees</span>
+            <strong className={recommendation.normalizedState === 'needs_information' ? styles.warningText : ''}>{recommendation.normalizedState === 'needs_information' ? 'More information needed' : 'Ready to review'}</strong>
           </div>
         </section>
 
         <div className={styles.grid}>
           <section className={`${styles.card} ${styles.transcript}`}>
-            <div className={styles.cardHeading}><div><span className={styles.kicker}>01 / PARENT INTAKE</span><h2>What came in</h2></div><span className={styles.fixture}>demo-sms</span></div>
+            <div className={styles.cardHeading}><div><span className={styles.kicker}>01 / PARENT INQUIRY</span><h2>Start with the question</h2></div><span className={styles.fixture}>made-up example</span></div>
             <div className={styles.messages}>
               <div className={styles.message}><span>parent@example.test · inquiry-1</span>Can I book a 60 minute lesson for Sam this Saturday?</div>
               <div className={`${styles.message} ${styles.messageRight}`}><span>Roadsmith draft · not sent</span>What is the pickup address and when is Sam available?</div>
@@ -118,7 +111,7 @@ export default function OperatorReviewDemoPage() {
           </section>
 
           <section className={`${styles.card} ${styles.lesson}`}>
-            <div className={styles.cardHeading}><div><span className={styles.kicker}>02 / PROPOSED LESSON</span><h2>Owner review, not a booking</h2></div><span className={styles.awaiting}>AWAITING OWNER CONFIRMATION</span></div>
+            <div className={styles.cardHeading}><div><span className={styles.kicker}>02 / ROADSMITH PROPOSAL</span><h2>A feasible lesson, not a booking</h2></div><span className={styles.awaiting}>OWNER DECIDES</span></div>
             <div className={styles.lessonMain}><strong>{formatDate(recommendation.candidate.startsAt)}</strong><span>60-minute behind-the-wheel lesson</span></div>
             <dl className={styles.facts}>
               <div><dt>Pickup</dt><dd>{display(recommendation.candidate.location)}</dd></div>
@@ -126,12 +119,13 @@ export default function OperatorReviewDemoPage() {
               <div><dt>Price fixture</dt><dd>{recommendation.candidate.price === null ? 'Not supplied' : `$${recommendation.candidate.price}`}</dd></div>
               <div><dt>Recommendation</dt><dd>{recommendation.recommendationId}</dd></div>
             </dl>
-            <p className={styles.hint}>This is an observed candidate slot. It is never displayed as booked, paid, or confirmed.</p>
+            <p className={styles.hint}>Roadsmith proposes a slot using the pickup location and available evidence. The owner still decides whether anything should move forward.</p>
           </section>
         </div>
 
-        <section className={styles.card}>
-          <div className={styles.cardHeading}><div><span className={styles.kicker}>03 / REASONING CORE</span><h2>What Roadsmith found, and why</h2></div><span className={styles.fixture}>{recommendation.detectors.length} bounded checks</span></div>
+        <details className={styles.card}>
+          <summary className={styles.evidenceSummary}><span><span className={styles.kicker}>03 / SUPPORTING EVIDENCE</span><strong>See why this proposal is safe to review</strong></span><span className={styles.summaryHint}>Technical detail</span></summary>
+          <div className={styles.cardHeading}><div><span className={styles.kicker}>EVIDENCE CHECKS</span><h2>What Roadsmith found, and why</h2></div><span className={styles.fixture}>{recommendation.detectors.length} checks</span></div>
           <div className={styles.detectors}>
             {recommendation.detectors.map((detector) => (
               <article key={detector.detectorId} className={`${styles.detector} ${detector.detectorId === 'payment-stall' ? styles.payment : ''}`}>
@@ -144,40 +138,28 @@ export default function OperatorReviewDemoPage() {
             ))}
           </div>
           {paymentWarning?.result === 'warning' && <div className={styles.paymentCallout}><strong>Payment-stall warning</strong> The synthetic booking is still pending while payment is pending. This is a reason for owner attention, not a payment attempt or Stripe observation.</div>}
-          {recommendation.missingEvidence.length > 0 && <div className={styles.missingSummary}><strong>Missing information</strong><span>{recommendation.missingEvidence.join(' · ')}</span><p>Roadsmith is asking for information instead of guessing.</p></div>}
-        </section>
+        </details>
+        {recommendation.missingEvidence.length > 0 && <div className={styles.missingSummary}><strong>Needs information before a proposal can be trusted</strong><span>{recommendation.missingEvidence.join(' · ')}</span><p>Roadsmith is asking for information instead of guessing.</p></div>}
 
         <section className={styles.card}>
-          <div className={styles.cardHeading}><div><span className={styles.kicker}>04 / SIMULATED HANDOFF</span><h2>What happens after approval</h2></div><span className={styles.fixture}>local state only</span></div>
-          <div className={styles.handoffGrid}>
-            <article className={`${styles.handoffStep} ${outcome === 'approve' || outcome === 'override' ? styles.handoffReady : ''}`}>
-              <span className={styles.handoffNumber}>01</span><div><strong>Owner approval</strong><p>{outcome === 'approve' ? 'Approved locally by demo-owner.' : outcome === 'override' ? 'Exception accepted with an owner note.' : 'Waiting for the owner decision above.'}</p></div><span className={styles.statePill}>{outcome === 'approve' || outcome === 'override' ? 'approved' : 'awaiting'}</span>
-            </article>
-            <article className={`${styles.handoffStep} ${outcome === 'approve' || outcome === 'override' ? styles.handoffReady : ''}`}>
-              <span className={styles.handoffNumber}>02</span><div><strong>Payment + booking</strong><p>{outcome === 'approve' || outcome === 'override' ? 'Simulated payment pending · booking still not written.' : 'Candidate only · no charge or booking exists.'}</p></div><span className={styles.statePill}>{outcome === 'approve' || outcome === 'override' ? 'simulated' : 'held'}</span>
-            </article>
-            <article className={`${styles.handoffStep} ${reminderQueued ? styles.handoffReady : ''}`}>
-              <span className={styles.handoffNumber}>03</span><div><strong>Reminder state</strong><p>{reminderQueued ? 'Reminder queued in local UI; no message provider was called.' : 'No reminder queued until the operator chooses to simulate it.'}</p></div><button className={styles.inlineAction} type="button" onClick={() => setReminderQueued(true)} disabled={!outcome || outcome === 'reject' || outcome === 'dismiss' || outcome === 'needs_information'}>{reminderQueued ? 'Queued locally' : 'Simulate reminder'}</button>
-            </article>
-            <article className={`${styles.handoffStep} ${noteSaved ? styles.handoffReady : ''}`}>
-              <span className={styles.handoffNumber}>04</span><div><strong>Post-lesson note</strong><p>{noteSaved ? 'Note saved to local demo state.' : 'Draft a follow-up note without persisting it.'}</p><textarea className={styles.lessonNote} value={lessonNote} onChange={(event) => { setLessonNote(event.target.value); setNoteSaved(false) }} aria-label="Synthetic post-lesson note" /></div><button className={styles.inlineAction} type="button" onClick={() => setNoteSaved(true)}>{noteSaved ? 'Saved locally' : 'Save local note'}</button>
-            </article>
+          <div className={styles.cardHeading}><div><span className={styles.kicker}>04 / OWNER DECISION</span><h2>Nothing moves without approval</h2></div><span className={styles.fixture}>page-only simulation</span></div>
+          <div className={styles.decisionState} role="status">
+            <strong>{run.review ? `Owner decision: ${run.review.outcome}` : 'Waiting for the owner decision'}</strong>
+            <span>{run.review ? 'Recorded in temporary page state. Side effects: [] — nothing was charged, booked, sent, cancelled, rescheduled, or persisted.' : 'The proposal remains a proposal until the owner chooses an outcome.'}</span>
           </div>
-          <p className={styles.handoffDisclosure}>All four handoff states are synthetic fixture labels. Approval, payment, booking, reminder, and note controls never call an external system.</p>
         </section>
 
         <section className={styles.reviewSection}>
-          <div className={styles.reviewCopy}><span className={styles.kicker}>05 / WHAT THE OWNER DECIDES</span><h2>Choose a simulated review outcome</h2><p>These buttons call only the pure local review functions and update this page’s React state. They do not authorize a worker or external action.</p></div>
+          <div className={styles.reviewCopy}><span className={styles.kicker}>05 / YOUR TURN</span><h2>Make the owner decision</h2><p>Choose what the owner would do with this proposal. This is the point of the workflow: Roadsmith prepares the evidence, but the owner keeps the judgment.</p></div>
           <div className={styles.actions}>
             {OUTCOMES.map((item) => <button key={item.value} className={item.value === 'approve' ? styles.primaryAction : styles.action} onClick={() => chooseOutcome(item.value)}>{item.label}</button>)}
           </div>
           <label className={styles.noteField}>Override note <textarea value={overrideNote} onChange={(event) => setOverrideNote(event.target.value)} placeholder="Required only for override" rows={2} /></label>
           {error && <p className={styles.error}>{error}</p>}
-          {run.review && <div className={styles.reviewRecord}><div><span className={styles.kicker}>SIMULATED REVIEW RECORD</span><strong>{run.review.outcome} · {run.review.reviewId}</strong></div><span className={styles.sideEffects}>sideEffects: []</span><p>{run.review.note || 'No owner note supplied.'}</p></div>}
+          {run.review && <div className={styles.reviewRecord}><div><span className={styles.kicker}>DECISION RECORDED IN THIS DEMO</span><strong>{run.review.outcome} · owner decision</strong></div><span className={styles.sideEffects}>side effects: []</span><p>{run.review.note || 'The proposal was reviewed without creating a booking or payment.'}</p></div>}
         </section>
-
-        <footer className={styles.footer}>Synthetic identifiers: {run.rawEvents.map((event) => event.eventId).join(' · ')}<br />No network provider, database, credential, persistence, or production navigation is used by this route.</footer>
       </div>
+        <footer className={styles.footer}>Synthetic walkthrough · no network provider, database, credential, persistence, or production navigation is used by this route.</footer>
     </main>
   )
 }

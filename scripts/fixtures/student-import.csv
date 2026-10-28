@@ -1,4 +1,4 @@
 Full Name,Email,Phone,Permit Number,Date of Birth,Parent Email
-Alex Morgan,alex.morgan@demo.com,8655551234,TN-2026-001,2008-05-12,parent.alex@demo.com
-Jordan Lee,jordan.lee@demo.com,8655551235,TN-2026-002,2008-07-22,jordan.parent@demo.com
-Sam Patel,sam.patel@demo.com,8655551236,TN-2026-003,2008-03-08,sam.parent@demo.com
+Test Student A,student-a@example.test,5550101,TN-EXAMPLE-001,2008-05-12,parent-a@example.test
+Test Student B,student-b@example.test,5550102,TN-EXAMPLE-002,2008-07-22,parent-b@example.test
+Test Student C,student-c@example.test,5550103,TN-EXAMPLE-003,2008-03-08,parent-c@example.test

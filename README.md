@@ -1,8 +1,23 @@
-# RoadSmith
+# Roadsmith
 
-RoadSmith is a white-label booking and operations platform for driving schools. It helps a school collect parent-first intake, account for time and travel, route feasible scheduling proposals to an operator for approval, collect payment, confirm bookings, send reminders, handle rescheduling, and record post-lesson notes.
+Roadsmith is a white-label booking and operations platform for driving schools. It helps a school collect parent-first intake, account for time and travel, route feasible scheduling proposals to an operator for approval, collect payment, confirm bookings, send reminders, handle rescheduling, and record post-lesson notes.
 
-> RoadSmith is pre-release software. This public repository is a reviewer-facing release candidate, not a production deployment.
+> Roadsmith is pre-release software. The public demo uses synthetic data and does not represent production readiness.
+
+## Start here: the reviewer path
+
+1. [Open the live synthetic operator-review demo](https://roadsmith-phi.vercel.app/demo/operator-review).
+2. Inspect the evidence, switch to incomplete evidence, and choose a simulated outcome.
+3. Read the [technical review handoff](docs/INTERNSHIP_REVIEW.md) and [STEM Academy project brief](docs/STEM_ACADEMY_REVIEW.md).
+4. Use the [current capability status](docs/PROJECT_STATUS.md) to separate implemented, simulated, integration-present, experimental, planned, and blocked work.
+
+The fastest way to understand Roadsmith is to follow that sequence, then read the implementation behind the `src/lib/workflow-watchdog/` boundary. The demo is synthetic and side-effect-free; it does not prove production payment correctness, tenant isolation, provider delivery, or government-form submission.
+
+## Live demo
+
+Open the hosted synthetic operator-review demo: [roadsmith-phi.vercel.app/demo/operator-review](https://roadsmith-phi.vercel.app/demo/operator-review).
+
+No installation, account, API key, or localhost server is required. The demo shows how Roadsmith evaluates a proposed lesson, presents evidence to an operator, and records simulated decisions without sending messages, charging cards, creating bookings, or writing to a database.
 
 ## What it solves
 
@@ -25,29 +40,11 @@ The operator-approval boundary is intentional: a recommendation is not a confirm
 
 ## Current status
 
-This repository is an internship-review release candidate, not a production-ready deployment.
+Implemented areas include the public booking flow, school onboarding, school-admin dashboard, instructors, sessions, calendar, student records, CSV import, Tennessee compliance tracking, demo mode, Stripe integration points, transactional email integration points, and workflow-watchdog tests.
 
-### Working now
+Experimental or review-required areas include newer scheduling and payment orchestration, production migration reconciliation, live RLS verification, and the exact canonical Vercel project/hostname relationship. Historical agent-operator migrations remain for reconciliation but are not part of the public runtime. SMS reminders, complete instructor availability management, government-form submission, and production-grade automation are not claimed as complete.
 
-Implemented areas include the public booking flow, school onboarding, school-admin dashboard, instructors, sessions, calendar, student records, CSV import, Tennessee compliance readiness tracking, demo mode, Stripe integration points, transactional email integration points, and workflow-watchdog tests.
-
-### Demonstrable locally
-
-The operator-review demo runs against synthetic fixtures, evaluates four safety detectors, records an approval decision, and produces no external side effects. See [DEMO.md](DEMO.md) for the five-minute path.
-
-The reviewer story is intentionally ordered as: parent inquiry → travel-aware lesson proposal → evidence review → owner decision → explicitly simulated handoff. The homepage links directly into that walkthrough at `/demo`.
-
-### Experimental
-
-Newer scheduling and payment orchestration, production migration reconciliation, live RLS verification, and the exact canonical Vercel project/hostname relationship require review.
-
-### Not implemented or partial
-
-Government-form generation and submission, SMS reminders, complete instructor availability management, and production-grade automation are not claimed as complete. Historical agent-operator migrations remain for reconciliation but are not part of the public runtime.
-
-### Requires production hardening
-
-Hosted schema parity, tenant-isolation verification, dependency remediation, provider failure handling, observability, and deployment ownership must be resolved before production use.
+The repository is being prepared for public review. Public visibility, credential rotation, hosted-service verification, and any Git-history remediation remain approval-gated release work. See [docs/PUBLIC-RELEASE-BOUNDARY.md](docs/PUBLIC-RELEASE-BOUNDARY.md).
 
 ## Stack
 
@@ -61,18 +58,7 @@ Hosted schema parity, tenant-isolation verification, dependency remediation, pro
 | Hosting | Vercel |
 | Tests | Node unit tests and Playwright/HTTP smoke checks |
 
-## Hosted reviewer path
-
-Start here—no install, credentials, or local services are required:
-
-- [Open the verified live homepage](https://roadsmith-phi.vercel.app/)
-- [Open the verified live operator-review demo](https://roadsmith-phi.vercel.app/demo/operator-review)
-
-The hosted operator-review path uses synthetic fixtures and is side-effect-free. It walks through parent intake, a travel-aware candidate lesson, four bounded detectors, evidence review, an owner decision, and an explicitly simulated handoff. It does not send messages, charge cards, change calendars, create bookings, call Maps or other providers, mutate Supabase, or persist production data. Approval and follow-up controls update only local page state and show `sideEffects: []`.
-
-The hosted URL is the current deployed state. This repository change does not update or deploy that hosted page.
-
-## Optional local developer path
+## Local setup
 
 Requirements: Node.js 22.6 or newer, npm, and Docker only when running local Supabase services.
 
@@ -90,11 +76,9 @@ Required checks are listed once in [docs/TESTING.md](docs/TESTING.md) and match 
 
 ## Environments and demo
 
-Local, preview, demo, and production credentials must remain separate. For
-review, use the hosted path above and [DEMO.md](DEMO.md). Local setup is only
-for developers who need to inspect or change the code. Do not enter real
-student, parent, instructor, school, payment, address, or booking-token data
-into the hosted or local demo.
+Local, preview, demo, and production credentials must remain separate. The hosted demo is [roadsmith-phi.vercel.app](https://roadsmith-phi.vercel.app/). Do not enter real student, parent, instructor, school, payment, or booking-token data into the demo.
+
+The hosted reviewer path is intentionally limited to `/demo/operator-review`; authenticated product routes may require configured services and are not part of the public demo contract.
 
 ## Repository layout
 
@@ -109,14 +93,7 @@ public/               Public assets reviewed for release safety
 .github/              CI, issue templates, and pull-request guidance
 ```
 
-For the complete reviewer path, start with [DEMO.md](DEMO.md), then
-[docs/ENGINEERING-HIGHLIGHTS.md](docs/ENGINEERING-HIGHLIGHTS.md),
-[docs/INTERNSHIP_REVIEW.md](docs/INTERNSHIP_REVIEW.md),
-[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md),
-[docs/WORKFLOWS.md](docs/WORKFLOWS.md), and
-[docs/PUBLIC-RELEASE-BOUNDARY.md](docs/PUBLIC-RELEASE-BOUNDARY.md). `SPEC.md`
-and historical specifications are planning context, not a list of completed
-product claims.
+Read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/WORKFLOWS.md](docs/WORKFLOWS.md), [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md), [docs/PUBLIC-RELEASE-BOUNDARY.md](docs/PUBLIC-RELEASE-BOUNDARY.md), and [docs/INTERNSHIP_REVIEW.md](docs/INTERNSHIP_REVIEW.md) for more detail. The authoritative-file map is in [docs/REPOSITORY_GUIDE.md](docs/REPOSITORY_GUIDE.md).
 
 ## Contributing and security
 
@@ -124,4 +101,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development and verification expectat
 
 ## License
 
-Roadsmith is proprietary software. See [LICENSE](LICENSE). Public visibility does not grant permission to use, copy, modify, or redistribute the software.
+Roadsmith is proprietary software. See [LICENSE](LICENSE). Public visibility, if approved later, does not grant permission to use, copy, modify, or redistribute the software.
