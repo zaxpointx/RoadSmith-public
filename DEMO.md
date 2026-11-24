@@ -1,73 +1,40 @@
 # Roadsmith demo
 
-This is the fastest way for a reviewer to understand the project. The demo is
-read-only with synthetic fixtures: it does not send messages, charge cards,
-create bookings, mutate Supabase, call Maps, or contact any provider.
+A 10-minute walkthrough of the product on your own machine. Everything is synthetic: a fictional school (Larkspur Driving School, Nashville), fictional families, phone numbers in the 555 range, and a test checkout. No text messages, emails or charges leave your computer, and no account or key is needed.
 
-## Start with the hosted demo
+## Start it
 
-No install or credentials are required:
-
-- [Verified live homepage](https://roadsmith-phi.vercel.app/)
-- [Verified live operator-review workflow](https://roadsmith-phi.vercel.app/demo/operator-review)
-
-The hosted page is the current deployed state; this repository change does not
-update or deploy it. Every decision and handoff control is synthetic page
-state, and the review record remains `sideEffects: []`.
-
-## Optional local setup
-
-Requirements: Node.js 22.6 or newer and npm.
+Requirements: Node.js 22.6+ and npm.
 
 ```bash
 npm ci
-cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000/demo/operator-review](http://localhost:3000/demo/operator-review).
-No real credentials are required for the synthetic operator-review flow.
+Open:
 
-## Five-minute walkthrough
+- **http://localhost:3000/sandbox**: text the school as any person
+- **http://localhost:3000/app**: the owner's Control Center (one click to sign in as the demo owner)
 
-1. Open the operator-review page from the homepage, or go directly to the
-   route above.
-2. Review the normalized parent inquiry: student, pickup location, and
-   availability.
-3. Review the travel-aware proposed lesson. It is a candidate slot, never a
-   booking or confirmation.
-4. Inspect the four detector results: travel conflict, duplicate booking,
-   payment stall, and unexpected booking state.
-5. Review the evidence attached to each result, including any missing
-   information and the payment-stall warning.
-6. Choose an owner decision. Approval, rejection, dismissal, needs-information,
-   and override are all local review outcomes.
-7. Inspect the explicitly simulated handoff: payment and booking remain
-   unwritten, reminders are only queued in local UI state, and post-lesson notes
-   are saved only in the page state.
-8. Confirm that the simulated owner approval records a decision while the
-   side-effects list remains empty.
+The first page load creates the sandbox database in `.roadsmith/` and seeds it, which takes a few seconds. **Reset sandbox** (on the sandbox page) puts everything back to the starting data.
 
-The command-line equivalent is:
+## The journey
 
-```bash
-node scripts/run-booking-operator-demo.mjs
-```
+1. **A new parent asks.** On the sandbox page, pick **New parent** and text: `Hi! How much are lessons?` Then `I want to book a driving lesson for my daughter`. Answer the questions (`my daughter`, `Olivia Grant 04/02/2010`, `1500 Riverside Dr, Nashville TN 37206`, `permit TN55512345`). The times you're offered come from the scheduler: instructor hours, holidays, time off, classes and the drive between pickups.
+2. **Book and pay.** Reply with a letter. You get a hold and a payment link. Open it, try **Simulate a declined card** (a retry link is texted), then **Pay with a test card**. The confirmation text arrives, and the instructor is told about the new lesson.
+3. **A full class.** Text `Do you have drivers ed classes?`, pick the class with one seat left, and register a student. The seat is held. Try the same class from another number (type any number under "Text as") and you'll be offered the next class instead.
+4. **Changes.** As **Linda Carter** (Emma's mom): `Can we move it to Saturday morning?` and pick a time. As **James Rivera**: `cancel my lesson tomorrow`, then `yes`. A paid cancellation sends the refund to the owner for approval.
+5. **Things it won't decide.** As Linda: `Emma was in a fender bender during practice, is she ok to drive?` This goes to the owner as urgent, and the owner gets a text.
+6. **Instructors, with no app.** As **John Smith**: `schedule tomorrow`, `who's next`, `running 15 min late` (the next family is told), `block friday 9-11am dentist`.
+7. **The owner.** Open **Control Center**. The **Today** page shows what needs you, what was handled, each instructor's route and the money collected.
+   - **Draft drive times** for last week's class: Roadsmith schedules every student's behind-the-wheel lesson, grouped by neighborhood, and skips the student without a permit. Approve it and each family gets their time.
+   - Or do it by text as **Maya Torres**: `plan drives`, `inbox`, `approve 1`.
+8. **Time.** On the sandbox page, **Tomorrow 7am** jumps the clock. Instructors get their morning schedules, the owner gets a brief, reminders go out, and unpaid holds are released.
+9. **Control.** In **Playbook**, set **Book driving lessons** to **Ask me first** and save. Book again as a parent: the request lands in your inbox as a one-click approval.
+10. **Tenant isolation.** Switch "School being texted" to **Harbor Point Driving** and text as Linda. That school has never heard of her and sees nothing from Larkspur.
 
-The expected result is four detectors and zero side effects. Unit tests also
-cover missing evidence, changed replay input, exact replay deduplication, and
-owner overrides.
+## About the assistant's replies
 
-## What is real and what is simulated
+Without an `ANTHROPIC_API_KEY`, replies come from Roadsmith's built-in interpreter. It handles the requests above and hands anything else to the owner. To use Claude for natural conversation, add a key to `.env.local` (see `.env.example`) and restart. Both engines use the same permission-checked tools. The sandbox banner and the Playbook page show which engine is active.
 
-- **Real locally:** the intake normalization, detector logic, evidence model,
-  review decision model, and tests.
-- **Simulated:** provider events and the demo approval; no real Twilio, Google
-  Calendar, Stripe, Maps, Resend, or Supabase calls occur in this path.
-- **Partial:** live booking, payments, reminders, compliance submission, hosted
-  RLS verification, and production automation require configured non-production
-  services and additional hardening.
-
-Do not enter real student, parent, instructor, school, payment, address, or
-booking-token data into the demo. Use only synthetic fixtures and disposable
-development credentials.
+How it works and what's verified: [docs/OS.md](docs/OS.md).

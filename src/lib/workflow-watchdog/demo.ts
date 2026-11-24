@@ -1,6 +1,4 @@
-// @ts-expect-error Node's strip-types runner needs the explicit extension for local demo execution.
 import { runDetectors } from './detectors.ts'
-// @ts-expect-error Node's strip-types runner needs the explicit extension for local demo execution.
 import { createReviewRecord, normalizeReviewSnapshot } from './review.ts'
 import type {
   BookingReviewSnapshot,

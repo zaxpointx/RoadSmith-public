@@ -8,6 +8,8 @@ the actual-schema reference.
 
 | Area | Primary locations | Verification seam |
 |---|---|---|
+| Roadsmith OS (assistant, engine, Control Center) | `src/lib/os/`, `src/app/app/`, `src/app/sandbox/`, `src/app/pay/`, `src/app/api/os/`, `src/components/os/`, `supabase/migrations/20261124000000_roadsmith_os.sql` | `tests/unit/os-*.test.mjs`, `e2e/os-journey.spec.ts`, `npm run os:drill` ([OS.md](OS.md)) |
+| Marketing site | `src/app/page.tsx`, `src/app/_components/site/` | `e2e/homepage-smoke.spec.ts` |
 | Public booking | `src/app/book/`, `src/app/api/bookings/`, `src/app/api/booking-links/`, `src/app/api/slots/` | public booking routes and `e2e/booking-loop.spec.ts` |
 | School administration | `src/app/school-admin/`, `src/app/api/school-admin/`, `src/components/admin/` | authenticated admin routes, demo mode, and dashboard/compliance behavior |
 | Instructors | `src/app/instructor/`, `src/app/api/instructor/`, `src/app/api/instructors/` | instructor schedule, student, availability, and booking routes |

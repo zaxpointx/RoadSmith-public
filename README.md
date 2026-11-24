@@ -1,53 +1,34 @@
-# RoadSmith
+# Roadsmith
 
-RoadSmith is a white-label booking and operations platform for driving schools. It helps a school collect parent-first intake, account for time and travel, route feasible scheduling proposals to an operator for approval, collect payment, confirm bookings, send reminders, handle rescheduling, and record post-lesson notes.
+Roadsmith is an AI front desk for driving schools that works by text message. Parents, students, instructors and the owner text the school's number in plain English. Roadsmith answers questions, enrolls students, books lessons around real drive times, collects payments, sends reminders, reschedules and keeps instructors on schedule. The owner gets results and a short list of decisions, not another dashboard to operate.
 
-> RoadSmith is pre-release software. This public repository is a reviewer-facing release candidate, not a production deployment.
+> Pre-release. Everything below runs locally in a synthetic sandbox; going live needs the accounts listed under [Before onboarding a real school](docs/OS.md#before-onboarding-a-real-school).
 
-## What it solves
+## Try it in two minutes
 
-Small driving schools often coordinate instructors, pickup locations, student records, deposits, reminders, and compliance work across calendars, forms, spreadsheets, and payment links. Roadsmith brings those operational steps into one school-scoped workflow while keeping approval and side effects explicit.
+```bash
+npm ci
+npm run dev
+```
 
-## Product workflow
+- **http://localhost:3000/sandbox** — text the demo school as a parent, student, instructor or owner
+- **http://localhost:3000/app** — the owner's Control Center (one click into the demo)
 
-The intended flow is:
+No keys, accounts or database are needed: the sandbox runs real Postgres in-process (PGlite) with a fictional school, and nothing leaves your machine. Follow [DEMO.md](DEMO.md) for the 10-minute journey from a parent's first text to payment, instructor coordination and the owner's approvals.
 
-1. Parent or student starts intake.
-2. Roadsmith captures service, location, availability, and contact information.
-3. Travel-aware scheduling evaluates instructor availability and route feasibility.
-4. A school operator reviews and approves a proposal.
-5. Payment or deposit state is recorded.
-6. The appointment becomes a confirmed booking.
-7. Reminders, cancellation, and rescheduling use scoped server-side flows.
-8. The operator records the lesson outcome and notes.
+## How it works
 
-The operator-approval boundary is intentional: a recommendation is not a confirmed booking, and a payment or email side effect is not assumed to have succeeded without evidence.
+- **AI for conversation, ordinary software for anything exact.** The assistant (Claude when `ANTHROPIC_API_KEY` is set, otherwise a built-in interpreter) can act only through permission-checked tools bound to one school and one person.
+- **Scheduling is deterministic and travel-aware.** It checks instructor hours, time off, classes and holidays, plus the drive from the previous pickup. Postgres exclusion constraints make double-booking impossible.
+- **Nothing is "paid" until the payment provider says so.** Holds expire on their own; late payments go to the owner.
+- **Owners set the autonomy.** Each kind of decision is set to handle it, ask me first or send to me. Refunds, late changes and anything sensitive come to the owner.
+- **Everything is audited.** Every action records who or what did it.
 
-## Current status
+Architecture, safety model, verification status and go-live checklist: **[docs/OS.md](docs/OS.md)**. Industry and compliance research: [docs/research/INDUSTRY-RESEARCH.md](docs/research/INDUSTRY-RESEARCH.md).
 
-This repository is an internship-review release candidate, not a production-ready deployment.
+## Earlier modules
 
-### Working now
-
-Implemented areas include the public booking flow, school onboarding, school-admin dashboard, instructors, sessions, calendar, student records, CSV import, Tennessee compliance readiness tracking, demo mode, Stripe integration points, transactional email integration points, and workflow-watchdog tests.
-
-### Demonstrable locally
-
-The operator-review demo runs against synthetic fixtures, evaluates four safety detectors, records an approval decision, and produces no external side effects. See [DEMO.md](DEMO.md) for the five-minute path.
-
-The reviewer story is intentionally ordered as: parent inquiry → travel-aware lesson proposal → evidence review → owner decision → explicitly simulated handoff. The homepage links directly into that walkthrough at `/demo`.
-
-### Experimental
-
-Newer scheduling and payment orchestration, production migration reconciliation, live RLS verification, and the exact canonical Vercel project/hostname relationship require review.
-
-### Not implemented or partial
-
-Government-form generation and submission, SMS reminders, complete instructor availability management, and production-grade automation are not claimed as complete. Historical agent-operator migrations remain for reconciliation but are not part of the public runtime.
-
-### Requires production hardening
-
-Hosted schema parity, tenant-isolation verification, dependency remediation, provider failure handling, observability, and deployment ownership must be resolved before production use.
+The repository also contains the earlier Supabase-backed school-admin dashboard (`/school-admin`), public booking pages (`/book`), instructor pages and the operator-review demo (`/demo`). They need a configured hosted Supabase project and are not part of the new Roadsmith OS runtime; see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Stack
 
@@ -55,15 +36,17 @@ Hosted schema parity, tenant-isolation verification, dependency remediation, pro
 | --- | --- |
 | Web application | Next.js 16, React 19, TypeScript |
 | Styling | Tailwind CSS 4 |
-| Data and auth | Supabase, Postgres, RLS, magic-link auth |
-| Payments | Stripe |
-| Email | Resend |
+| Data and auth | Postgres (`rs` schema; Supabase in production, PGlite in the local sandbox), signed sessions, Supabase magic-link auth |
+| Conversation | Claude via the Anthropic Messages API (tool use), with a built-in rule-based fallback |
+| Texting | Twilio Messaging (sandbox outbox locally) |
+| Payments | Stripe Checkout (test checkout locally) |
+| Email | Resend (earlier modules) |
 | Hosting | Vercel |
 | Tests | Node unit tests and Playwright/HTTP smoke checks |
 
-## Hosted reviewer path
+## Earlier hosted demo
 
-Start here—no install, credentials, or local services are required:
+The previously deployed operator-review demo (it predates Roadsmith OS and is not updated by this repository):
 
 - [Open the verified live homepage](https://roadsmith-phi.vercel.app/)
 - [Open the verified live operator-review demo](https://roadsmith-phi.vercel.app/demo/operator-review)
@@ -86,12 +69,12 @@ Put only disposable development credentials in `.env.local`; never commit it.
 
 Required checks are listed once in [docs/TESTING.md](docs/TESTING.md) and match CI. Scripts and environment variable groups are in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
-**Engineering docs:** [Index](docs/README.md) · [Architecture](docs/ARCHITECTURE.md) · [Development](docs/DEVELOPMENT.md) · [Testing](docs/TESTING.md) · [Deployment](docs/DEPLOYMENT.md) · [Database](docs/DATABASE.md) · [Decisions](docs/DECISIONS.md)
+**Engineering docs:** [Index](docs/README.md) · [Roadsmith OS](docs/OS.md) · [Architecture](docs/ARCHITECTURE.md) · [Development](docs/DEVELOPMENT.md) · [Testing](docs/TESTING.md) · [Deployment](docs/DEPLOYMENT.md) · [Database](docs/DATABASE.md) · [Decisions](docs/DECISIONS.md)
 
 ## Environments and demo
 
 Local, preview, demo, and production credentials must remain separate. For
-review, use the hosted path above and [DEMO.md](DEMO.md). Local setup is only
+review, use the local sandbox and [DEMO.md](DEMO.md). Local setup is only
 for developers who need to inspect or change the code. Do not enter real
 student, parent, instructor, school, payment, address, or booking-token data
 into the hosted or local demo.

@@ -2,6 +2,10 @@
 
 Roadsmith is a Next.js application with a single product repository and explicit integration boundaries.
 
+## Roadsmith OS
+
+The product's core — the text-message assistant, deterministic operations engine and owner Control Center — is documented in [OS.md](OS.md). It lives in `src/lib/os/`, `src/app/app/`, `src/app/sandbox/`, `src/app/pay/` and `src/app/api/os/`, uses the `rs` schema from `supabase/migrations/20261124000000_roadsmith_os.sql`, and does not depend on the earlier Supabase tables described below.
+
 ## Runtime boundaries
 
 - `src/app/` contains App Router pages, layouts, and API handlers.

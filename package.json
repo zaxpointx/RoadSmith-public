@@ -15,9 +15,13 @@
     "check:dependencies": "node scripts/reliability/dependency-security-check.mjs",
     "verify:completion": "node scripts/reliability/completion-verifier.mjs",
     "test": "npm run test:unit",
-    "check:docs": "node scripts/check-docs-links.mjs"
+    "check:docs": "node scripts/check-docs-links.mjs",
+    "os:drill": "node --experimental-strip-types --no-warnings scripts/os-drill.mts",
+    "os:smoke": "node --experimental-strip-types --no-warnings scripts/os-smoke.mts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.13.0",
+    "@electric-sql/pglite": "^0.6.0",
     "@react-three/fiber": "^9.6.1",
     "@supabase/ssr": "^0.10.2",
     "@types/stripe": "^8.0.416",
@@ -25,16 +29,19 @@
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.17.0",
     "next": "16.4.2",
+    "pg": "^8.23.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "stripe": "^22.0.2",
     "tailwind-merge": "^3.6.0",
-    "three": "^0.184.0"
+    "three": "^0.184.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.184.1",

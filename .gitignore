@@ -83,3 +83,6 @@ graphify-out/
 # Local audit and release outputs
 release-review/
 security-scan-results/
+
+# Roadsmith local sandbox database (synthetic data only)
+.roadsmith/
