@@ -238,6 +238,11 @@ const customerTools: ToolDef[] = [
       const s = await ownStudent(a, i.student_id)
       const phone = normalizePhone(String(i.guardian_phone ?? ''))
       if (!phone) return { ok: false, error: 'That phone number does not look valid.' }
+      if (s.guardian_contact_id) {
+        // Changing who the guardian is is never done by text: the office confirms it with the family.
+        await escalate(a, `Guardian change request for ${s.first_name}`, `${a.who.name || a.who.phone} asked to set ${String(i.guardian_name)} (${phone}) as guardian. The current guardian was kept.`)
+        return { ok: false, error: `${s.first_name} already has a parent or guardian on file. The office has to confirm a change — they've been asked.` }
+      }
       await addGuardian(a, s.id, String(i.guardian_name ?? '').slice(0, 80), phone, actorOf(a))
       return { ok: true, note: `${String(i.guardian_name)} is now the guardian contact and will get booking confirmations and reminders.` }
     },
@@ -652,6 +657,11 @@ const staffTools: ToolDef[] = [
       const ids = (a.state.pending?.intent === 'inbox' ? (a.state.pending.data.ids as string[]) : (await openInbox(a)).map((x) => x.id))
       const id = ids[Number(i.number) - 1]
       if (!id) return { ok: false, error: 'No item with that number; list decisions again.' }
+      if (i.decision === 'approve') {
+        const item = await one<{ action: { type: string; args: Record<string, unknown> } | null }>(a.q, `select action from rs.inbox where id = $1 and school_id = $2`, [id, a.school.id])
+        const moneyOut = item?.action?.type === 'refund_payment' || (item?.action?.type === 'cancel_lesson' && item.action.args.refund)
+        if (moneyOut) return { ok: false, error: 'Refunds can only be approved in the Control Center (signed in), not by text. Open the Today page to approve it.' }
+      }
       const r = await decideInbox(a, { id, decision: i.decision as 'approve' | 'decline' | 'resolve', staffId: a.who.staffId, staffName: a.who.name, note: str(i.note) })
       return { ok: true, item: r.item.title, status: r.item.status, result: r.result }
     },

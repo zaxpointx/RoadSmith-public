@@ -48,7 +48,7 @@ Each guarantee is enforced in code, and the column on the right says where.
 
 | Guarantee | Where it is enforced |
 | --- | --- |
-| No instructor or student is double-booked. | Postgres `EXCLUDE USING gist` constraints on `rs.lessons` (instructor, and student, by time range), plus engine checks. |
+| No instructor or student is double-booked. | Postgres `EXCLUDE USING gist` constraints on `rs.lessons` (instructor, and student, by time range), plus engine checks. Bookings and moves take transaction-scoped advisory locks on the instructor and the student, so concurrent requests can't both pass the drive-time check. |
 | A time is offered only if it is truly possible. | `findSlots` checks working hours, time off, classes, closed dates, minimum notice, the student's other commitments, and drive time from the previous stop and to the next one. `checkSlot` re-runs all of this right before any write. |
 | The agent can't invent a bookable time. | `book_lesson` and `reschedule_lesson` accept only an option letter that `find_lesson_times` returned in this conversation in the last 2 hours. |
 | The agent can't invent facts in a reply. | `grounding.ts` checks every clock time, dollar amount and link in a Claude reply against this turn's tool results and the playbook. One correction retry is allowed; after that the message goes to the owner. |
@@ -57,7 +57,9 @@ Each guarantee is enforced in code, and the column on the right says where.
 | Tenant isolation. | The school comes from the number that was texted, or from the signed session's staff row. It is never taken from request input. All queries are scoped by `school_id`. |
 | Roles. | `toolsFor(audience)`: customers get booking tools, instructors get schedule tools and no payment data, owners get everything. Only owners and admins can sign in to the Control Center. |
 | Autonomy limits. | `playbook.autonomy`: each action is set to handle it, ask me first, or send to me. Refunds and late changes default to ask me first. |
-| Messaging compliance. | STOP, START and HELP are handled by code before the agent runs. Opted-out numbers are suppressed in the outbox. The first reply discloses that the assistant is automated. Automated texts wait out quiet hours (default 9pm–8am). |
+| Money out needs a signed-in owner. | Refunds can't be approved by SMS (caller ID can be spoofed); only in the Control Center. Stripe refunds run after the approval commits, through a job with the payment id as the idempotency key. |
+| A real school never uses the test checkout. | Only synthetic schools on the local sandbox database get test checkout. A real school without a usable Stripe key gets no payment link, and the booking is passed to the office. Reopening a payment link reuses the open Stripe session. A second successful charge for the same request becomes an urgent alert. |
+| Messaging compliance. | STOP, START and HELP are handled by code before the agent runs. Opted-out numbers are suppressed in the outbox. The first reply discloses that the assistant is automated. Automated texts wait out quiet hours (default 9pm–8am), including hold-expiry notices. Outbound texts are claimed before sending (`for update skip locked`), so concurrent dispatchers never send twice. Twilio retries are ignored by `MessageSid`, and the webhook answers immediately and runs the agent turn afterwards. A real school without Twilio records texts as failed, never silently "sent". |
 | Audit. | Every change writes to `rs.audit_log` with the actor (agent, staff, system, provider or contact). Agent runs are logged with tool calls, grounding result, tokens and latency in `rs.agent_runs`. |
 
 Sensitive topics always go to the owner. These include medical and safety questions, accidents, complaints, discounts, and legal or paperwork questions. The built-in interpreter enforces this with patterns; the Claude prompt tells the model to call `escalate_to_owner`.
@@ -86,6 +88,7 @@ Everything below was run in this repository against the local sandbox. See [TEST
 | Area | Status |
 | --- | --- |
 | Engine: scheduling, travel feasibility, holidays, time off, overlaps, seats, holds, payment outcomes, refunds, drive plans, quiet hours | Unit-tested (`tests/unit/os-engine.test.mjs`) |
+| Independent review findings: no test checkout for real schools, payment-state transitions, duplicate charges, refunds outside transactions, guardian replacement, quiet hours on hold-expiry texts, SMS retry dedupe, no money approvals by text | Fixed and unit-tested (`tests/unit/os-review-fixes.test.mjs`) |
 | Agent: booking only from offered options, cross-family and cross-school isolation, instructor permission limits, STOP/START/HELP, escalation of sensitive messages, owner approval by text, grounding, the Claude loop with a fake client | Unit-tested (`tests/unit/os-agent.test.mjs`) |
 | Parent inquiry → registration → booking → declined card → payment → confirmation → owner view | Browser-tested (`e2e/os-journey.spec.ts`) and checked by hand |
 | Drive-plan drafting and approval, autonomy change, approval-gated booking, conversation takeover, mobile layout | Checked by hand in the browser |
@@ -106,6 +109,9 @@ Everything below was run in this repository against the local sandbox. See [TEST
 ## Known limits
 
 - Drive times are estimates. Addresses whose ZIP isn't in a service zone get a 30-minute buffer, so the engine stays conservative rather than optimistic.
-- The interpreter understands common phrasings only. For example, it reads "next week" and weekday names but not arbitrary dates like "Dec 9". Use Claude for natural conversation.
+- The interpreter understands common phrasings only: weekdays, "tomorrow", "next week", dates like "Dec 9" or "12/9", and morning, afternoon or evening. Use Claude for natural conversation.
 - One lesson per student per day, and a weekly maximum from the playbook.
-- A Stripe refund is issued from inside the approval transaction. If the database write then fails, the refund has already happened, so reconcile it in Stripe. This is rare, but noted.
+- **Owner identity over SMS is caller ID.** A spoofed number could read the owner's summaries, draft drive plans or text families. Money-out approvals are blocked by text for this reason. A per-owner PIN or the Control Center for all approvals is a sensible next step.
+- Foreign keys aren't composite with `school_id`. Tenant scoping is enforced in code, which every query and tool follows, rather than by the schema.
+- Course sessions and time off have no database constraint against lessons; the engine checks them under the per-instructor lock.
+- The grounding check covers clock times, amounts and links. It does not check day names or dates.

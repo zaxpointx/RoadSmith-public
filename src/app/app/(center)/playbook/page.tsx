@@ -16,10 +16,10 @@ export default async function PlaybookPage() {
   const sms = deliveryMode(s.school)
   const pay = paymentProvider(s.school.is_sandbox)
   const status = [
-    { name: 'Text messaging', state: sms === 'twilio' ? 'Twilio' : 'Sandbox', ok: sms === 'twilio',
-      note: sms === 'twilio' ? `Texts to ${displayPhone(s.school.agent_phone)} are answered live.` : 'Texts stay on this machine and appear in the sandbox phone. Connecting Twilio needs an account, a number and US A2P 10DLC registration.' },
-    { name: 'Payments', state: pay === 'stripe' ? 'Stripe' : 'Test checkout', ok: pay === 'stripe',
-      note: pay === 'stripe' ? 'Payment links open Stripe Checkout; bookings confirm from the signed webhook.' : 'Payment links open a labelled test checkout. No card is charged. Add Stripe keys to take real payments.' },
+    { name: 'Text messaging', state: sms === 'twilio' ? 'Twilio' : sms === 'sandbox' ? 'Sandbox' : 'Not connected', ok: sms === 'twilio',
+      note: sms === 'twilio' ? `Texts to ${displayPhone(s.school.agent_phone)} are answered live.` : sms === 'sandbox' ? 'Texts stay on this machine and appear in the sandbox phone. Connecting Twilio needs an account, a number and US A2P 10DLC registration.' : 'Not configured: outgoing texts are recorded as failed and nothing is sent. Add Twilio credentials.' },
+    { name: 'Payments', state: pay === 'stripe' ? 'Stripe' : pay === 'sandbox' ? 'Test checkout' : 'Not connected', ok: pay === 'stripe',
+      note: pay === 'stripe' ? 'Payment links open Stripe Checkout; bookings confirm from the signed webhook.' : pay === 'sandbox' ? 'Payment links open a labelled test checkout. No card is charged. Add Stripe keys to take real payments.' : 'Not configured: the assistant cannot hold paid bookings until Stripe keys are added.' },
     { name: 'Conversation engine', state: engine === 'claude' ? 'Claude' : 'Built-in interpreter', ok: engine === 'claude',
       note: engine === 'claude' ? `Model ${AGENT_MODEL}. Every time, price and link in a reply is checked against records before sending.` : 'No Anthropic API key is set, so replies come from a rule-based interpreter that handles common requests and passes the rest to you. Set ANTHROPIC_API_KEY for natural conversation.' },
     { name: 'Drive times', state: 'Estimated', ok: false, note: 'Travel between pickups is estimated from distance by ZIP-code zone, with extra padding for addresses that can\'t be placed. A maps provider is not connected.' },

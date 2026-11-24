@@ -29,7 +29,7 @@ export const playbookSchema = z.object({
     cancellation_hours: z.number().int().min(0).max(168).default(24),
     late_cancel_fee_cents: z.number().int().min(0).default(0),
     hold_minutes: z.number().int().min(10).max(1440).default(120),
-    min_notice_hours: z.number().int().min(0).max(168).default(12),
+    min_notice_hours: z.number().int().min(2).max(168).default(12), // holds end 1h before the lesson, so ≥2h
     permit_required_for_lessons: z.boolean().default(true),
     minor_needs_guardian: z.boolean().default(true),
     booking_window_days: z.number().int().min(1).max(120).default(21),

@@ -1,6 +1,8 @@
 /** Executes approved inbox actions. Every action re-validates current state. */
 import { one } from './db.ts'
-import type { Actor } from './audit.ts'
+import { now } from './clock.ts'
+import { actorLabel, type Actor } from './audit.ts'
+import { scheduleJob } from './jobs.ts'
 import { cancelLesson, enrollInCourse, holdLesson, markRefunded, moveLesson } from './bookings.ts'
 import { applyDrivePlan, type DrivePlan } from './cohort.ts'
 import { notifyContact } from './messaging.ts'
@@ -16,9 +18,11 @@ async function refund(ctx: Ctx, paymentId: string, actor: Actor): Promise<string
   if (p.status !== 'paid') throw new OsError('invalid', `Payment is ${p.status}, not paid.`)
   if (p.provider === 'stripe') {
     if (!p.provider_ref) throw new OsError('invalid', 'No Stripe payment reference; refund it in the Stripe dashboard.')
-    const Stripe = (await import('stripe')).default
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
-    await stripe.refunds.create({ payment_intent: p.provider_ref })
+    // Never call Stripe inside a database transaction: mark it pending and let the job runner
+    // issue the refund (idempotency key = payment id) after this transaction commits.
+    await ctx.q.query(`update rs.payments set status = 'refund_pending' where id = $1`, [paymentId])
+    await scheduleJob(ctx, 'stripe_refund', now(), { paymentId, actorLabel: actorLabel(actor) }, `refund:${paymentId}`)
+    return `Refund of ${fmtMoney(p.amount_cents, p.currency)} approved; it is being sent to Stripe now.`
   }
   await markRefunded(ctx, paymentId, actor)
   return `Refunded ${fmtMoney(p.amount_cents, p.currency)}${p.provider === 'sandbox' ? ' (sandbox — no real money moved)' : ''}.`

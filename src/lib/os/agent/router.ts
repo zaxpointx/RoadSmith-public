@@ -86,7 +86,7 @@ function contextText(a: AgentCtx): string {
   return lines.join('\n')
 }
 
-export async function handleInbound(db: Db, args: { to: string; from: string; body: string }): Promise<InboundResult> {
+export async function handleInbound(db: Db, args: { to: string; from: string; body: string; externalId?: string }): Promise<InboundResult> {
   const to = normalizePhone(args.to), from = normalizePhone(args.from)
   const body = String(args.body ?? '').slice(0, 1600).trim()
   if (!to || !from || !body) return { handled: false, reason: 'invalid message' }
@@ -98,7 +98,7 @@ export async function handleInbound(db: Db, args: { to: string; from: string; bo
     const ctx: Ctx = { q, school }
     const who = await identify(ctx, from)
     const conv = await conversationFor(ctx, from, { audience: who.audience, contactId: who.audience === 'customer' ? who.contactId : undefined, staffId: who.audience !== 'customer' ? who.staffId : undefined })
-    await recordInbound(ctx, conv.id, body)
+    if (!(await recordInbound(ctx, conv.id, body, args.externalId))) return { done: true as const, reply: 'duplicate delivery ignored', conv }
     if (who.audience === 'customer') {
       const contact = (await one<{ opted_out: boolean }>(q, `select opted_out from rs.contacts where id = $1`, [who.contactId]))!
       if (STOP.test(body)) {

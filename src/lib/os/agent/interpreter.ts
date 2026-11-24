@@ -76,11 +76,26 @@ export function parsePrefs(a: AgentCtx, t: string): R {
   if (/weekend/.test(lower)) days.push('saturday')
   if (days.length) out.weekdays = [...new Set(days)]
   const today = localDate(now(), a.school.timezone)
+  const specific = specificDate(lower, today)
+  if (specific) { out.earliest_date = specific; out.latest_date = specific; delete out.weekdays; return out }
   if (/\btomorrow\b/.test(lower)) { out.earliest_date = addDays(today, 1); out.latest_date = addDays(today, 1) }
   else if (/\btoday\b/.test(lower)) { out.earliest_date = today; out.latest_date = today }
   else if (/next week/.test(lower)) { out.earliest_date = addDays(today, 7 - new Date(today + 'T12:00:00Z').getUTCDay() + 1) }
   else if (/this week/.test(lower)) { out.latest_date = addDays(today, 6 - new Date(today + 'T12:00:00Z').getUTCDay()) }
   return out
+}
+
+/** "Dec 9", "december 9th", "12/9" → the next such date on or after today. */
+export function specificDate(lower: string, today: string): string | null {
+  let mo = 0, d = 0
+  const m1 = /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\s+(\d{1,2})(?:st|nd|rd|th)?\b(?!\s*,?\s*\d{4})/.exec(lower)
+  const m2 = /\b(\d{1,2})\/(\d{1,2})\b(?!\/)/.exec(lower)
+  if (m1) { mo = MONTHS.indexOf(m1[1].slice(0, 3)) + 1; d = Number(m1[2]) } else if (m2) { mo = Number(m2[1]); d = Number(m2[2]) }
+  if (!mo || mo > 12 || d < 1 || d > 31) return null
+  const y = Number(today.slice(0, 4))
+  const candidate = iso(y, mo, d)
+  if (!candidate) return null
+  return candidate >= today ? candidate : iso(y + 1, mo, d)
 }
 
 function serviceFromText(t: string): string {

@@ -27,7 +27,7 @@ None of the required checks need real environment values (the optional booking E
 ## Unit tests
 
 Plain Node test runner (`node --test`) with `--experimental-strip-types`, files in `tests/unit/*.test.mjs`.
-Suites cover the completion verifier, compliance rules, contact handling, signed requests, the workflow watchdog, and Roadsmith OS (`os-engine.test.mjs`: scheduling, travel, double-booking, seats, payments, holds, drive plans, quiet hours; `os-agent.test.mjs`: tenant and family isolation, role limits, offered-options-only booking, STOP/HELP, escalation, grounding, the Claude loop with a fake client). OS tests run against an in-memory Postgres (PGlite) — no services needed.
+Suites cover the completion verifier, compliance rules, contact handling, signed requests, the workflow watchdog, and Roadsmith OS (`os-engine.test.mjs`: scheduling, travel, double-booking, seats, payments, holds, drive plans, quiet hours; `os-review-fixes.test.mjs`: regressions for the independent review; `os-agent.test.mjs`: tenant and family isolation, role limits, offered-options-only booking, STOP/HELP, escalation, grounding, the Claude loop with a fake client). OS tests run against an in-memory Postgres (PGlite) — no services needed.
 
 ## End-to-end
 

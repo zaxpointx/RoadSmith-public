@@ -156,11 +156,12 @@ create table if not exists rs.payments (
   description text not null,
   amount_cents integer not null check (amount_cents > 0),
   currency text not null default 'usd',
-  status text not null default 'pending' check (status in ('pending', 'paid', 'failed', 'expired', 'cancelled', 'refunded')),
+  status text not null default 'pending' check (status in ('pending', 'paid', 'failed', 'expired', 'cancelled', 'refund_pending', 'refunded')),
   token text not null unique,                 -- unguessable public link token
   provider text not null default 'sandbox' check (provider in ('sandbox', 'stripe')),
   provider_ref text,
   checkout_url text,
+  checkout_session_id text,                   -- reused so a family can't open two Stripe sessions
   failure_reason text,
   attempts integer not null default 0,
   expires_at timestamptz,
@@ -245,8 +246,10 @@ create table if not exists rs.messages (
   author text not null check (author in ('contact', 'agent', 'staff', 'system')),
   body text not null,
   meta jsonb not null default '{}'::jsonb,
+  external_id text,                           -- provider message id (Twilio MessageSid) for retry dedupe
   created_at timestamptz not null default now()
 );
+create unique index if not exists messages_external_id on rs.messages (school_id, external_id) where external_id is not null;
 create index if not exists messages_conversation on rs.messages (conversation_id, created_at);
 
 -- Every outbound message is recorded here before any provider is called.
@@ -256,7 +259,7 @@ create table if not exists rs.outbox (
   channel text not null default 'sms' check (channel in ('sms', 'email')),
   to_address text not null,
   body text not null,
-  status text not null check (status in ('queued', 'sent', 'failed', 'sandboxed', 'suppressed')),
+  status text not null check (status in ('queued', 'sending', 'sent', 'failed', 'sandboxed', 'suppressed')),
   provider text not null default 'sandbox',
   provider_ref text,
   error text,

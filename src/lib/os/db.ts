@@ -9,6 +9,7 @@
  * Every domain function receives a `Q` (query runner) so the same code runs
  * inside or outside a transaction.
  */
+import { createHash } from 'node:crypto'
 import { mkdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 
@@ -66,15 +67,23 @@ export async function openSandbox(dataDir?: string): Promise<Db> {
       return run
     },
   }
-  const exists = await pg.query<{ t: string | null }>(`select to_regclass('rs.schools')::text as t`)
-  if (!exists.rows[0]?.t) {
-    await pg.exec(await readFile(path.join(process.cwd(), MIGRATION), 'utf8'))
+  // The sandbox holds only synthetic data, so when the schema file changes we rebuild it.
+  const sql = await readFile(path.join(process.cwd(), MIGRATION), 'utf8')
+  const hash = createHash('sha256').update(sql).digest('hex')
+  const exists = await pg.query<{ t: string | null }>(`select to_regclass('rs.settings')::text as t`)
+  const current = exists.rows[0]?.t ? (await pg.query<{ value: { h: string } }>(`select value from rs.settings where key = 'schema_hash'`)).rows[0]?.value?.h : null
+  if (current !== hash) {
+    await pg.exec('drop schema if exists rs cascade')
+    await pg.exec(sql)
+    await pg.query(`insert into rs.settings (key, value) values ('schema_hash', $1::jsonb)`, [JSON.stringify({ h: hash })])
   }
   return db
 }
 
 async function openPostgres(): Promise<Db> {
-  const { Pool } = await import('pg')
+  const { Pool, types } = await import('pg')
+  // Keep DATE columns as 'YYYY-MM-DD' strings; node-pg's default (local midnight) shifts days east of UTC.
+  types.setTypeParser(1082, (v: string) => v)
   const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 5 })
   return {
     kind: 'postgres',

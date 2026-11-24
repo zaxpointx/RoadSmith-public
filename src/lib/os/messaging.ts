@@ -65,11 +65,15 @@ export async function saveState(q: Q, convId: string, state: ConversationState) 
   await q.query(`update rs.conversations set state = $2::jsonb where id = $1`, [convId, JSON.stringify(state)])
 }
 
-export async function recordInbound(ctx: Ctx, convId: string, body: string) {
-  await ctx.q.query(
-    `insert into rs.messages (school_id, conversation_id, direction, author, body, created_at) values ($1, $2, 'in', 'contact', $3, $4)`,
-    [ctx.school.id, convId, body, now()])
+/** Record an inbound text. Returns false if this provider message id was already recorded (a retry). */
+export async function recordInbound(ctx: Ctx, convId: string, body: string, externalId?: string | null): Promise<boolean> {
+  const r = await ctx.q.query(
+    `insert into rs.messages (school_id, conversation_id, direction, author, body, external_id, created_at) values ($1, $2, 'in', 'contact', $3, $4, $5)
+     on conflict (school_id, external_id) where external_id is not null do nothing returning id`,
+    [ctx.school.id, convId, body, externalId ?? null, now()])
+  if (!r.rows.length) return false
   await ctx.q.query(`update rs.conversations set last_message_at = $2 where id = $1`, [convId, now()])
+  return true
 }
 
 export interface SendOptions {
@@ -85,15 +89,17 @@ export async function sendToConversation(ctx: Ctx, conv: Pick<Conversation, 'id'
     `insert into rs.messages (school_id, conversation_id, direction, author, body, meta, created_at) values ($1, $2, 'out', $3, $4, $5::jsonb, $6)`,
     [ctx.school.id, conv.id, opts.author ?? 'agent', body, JSON.stringify(opts.meta ?? {}), t])
   await ctx.q.query(`update rs.conversations set last_message_at = $2 where id = $1`, [conv.id, t])
-  let status: 'queued' | 'sandboxed' | 'suppressed' = deliveryMode(ctx.school) === 'twilio' ? 'queued' : 'sandboxed'
+  const mode = deliveryMode(ctx.school)
+  let status: 'queued' | 'sandboxed' | 'suppressed' | 'failed' = mode === 'twilio' ? 'queued' : mode === 'sandbox' ? 'sandboxed' : 'failed'
   if (conv.contact_id) {
     const c = await one<{ opted_out: boolean }>(ctx.q, `select opted_out from rs.contacts where id = $1`, [conv.contact_id])
     if (c?.opted_out) status = 'suppressed'
   }
   await ctx.q.query(
-    `insert into rs.outbox (school_id, channel, to_address, body, status, provider, conversation_id, reason, created_at, sent_at)
-     values ($1, 'sms', $2, $3, $4, $5, $6, $7, $8, $9)`,
-    [ctx.school.id, conv.phone, body, status, status === 'queued' ? 'twilio' : 'sandbox', conv.id, opts.reason ?? '', t, status === 'sandboxed' ? t : null])
+    `insert into rs.outbox (school_id, channel, to_address, body, status, provider, conversation_id, reason, created_at, sent_at, error)
+     values ($1, 'sms', $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+    [ctx.school.id, conv.phone, body, status, mode === 'twilio' ? 'twilio' : 'sandbox', conv.id, opts.reason ?? '', t, status === 'sandboxed' ? t : null,
+      status === 'failed' ? 'Text messaging is not configured for this school (no Twilio credentials).' : null])
 }
 
 /** Text a customer contact (creates the conversation if needed). */
@@ -125,16 +131,20 @@ export async function notifyOwners(ctx: Ctx, body: string, opts: SendOptions = {
   for (const o of owners) await notifyStaff(ctx, o.id, body, opts)
 }
 
-export function deliveryMode(school: Pick<School, 'is_sandbox'>): 'sandbox' | 'twilio' {
+export function deliveryMode(school: Pick<School, 'is_sandbox'>): 'sandbox' | 'twilio' | 'unconfigured' {
   if (school.is_sandbox) return 'sandbox'
-  return process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN ? 'twilio' : 'sandbox'
+  return process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN ? 'twilio' : 'unconfigured'
 }
 
 /** Deliver queued outbox rows. Called after the transaction that queued them commits. */
 export async function dispatchOutbox(q: Q, schoolId?: string): Promise<number> {
+  // Claim rows first so concurrent dispatchers (webhook, cron, Control Center) never send twice.
   const rows = await many<{ id: string; to_address: string; body: string; agent_phone: string }>(q,
-    `select o.id, o.to_address, o.body, s.agent_phone from rs.outbox o join rs.schools s on s.id = o.school_id
-      where o.status = 'queued' and ($1::uuid is null or o.school_id = $1::uuid) order by o.created_at limit 50`, [schoolId ?? null])
+    `with claimed as (
+       update rs.outbox set status = 'sending' where id in (
+         select id from rs.outbox where status = 'queued' and ($1::uuid is null or school_id = $1::uuid) order by created_at limit 50 for update skip locked)
+       returning id, to_address, body, school_id)
+     select c.id, c.to_address, c.body, s.agent_phone from claimed c join rs.schools s on s.id = c.school_id`, [schoolId ?? null])
   for (const r of rows) {
     try {
       const sid = process.env.TWILIO_ACCOUNT_SID!, tokenValue = process.env.TWILIO_AUTH_TOKEN!

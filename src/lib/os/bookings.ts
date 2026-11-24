@@ -196,6 +196,7 @@ export async function holdLesson(ctx: Ctx, args: {
   const blockers = lessonBlockers(ctx, student, service)
   if (blockers.length) throw new OsError('incomplete', `Before booking we still need: ${blockers.join(', ')}.`)
   const pickup = service.pickup ? toPoint(student.lat, student.lng) : schoolPoint(ctx.school)
+  await lockScheduling(ctx, args.instructorId, student.id)
   const fit = await checkSlot(ctx, { service, instructorId: args.instructorId, start: args.start, pickup, studentId: student.id })
   if (!fit.ok) throw new OsError('conflict', `That time is no longer available (${fit.reason}).`)
   const end = new Date(+args.start + service.duration_min * 60000)
@@ -247,6 +248,7 @@ export async function moveLesson(ctx: Ctx, args: { lessonId: string; start: Date
   const service = (await getService(ctx, { id: lesson.service_id }))!
   const instructorId = args.instructorId ?? lesson.instructor_id
   const pickup = toPoint(lesson.pickup_lat, lesson.pickup_lng)
+  await lockScheduling(ctx, instructorId, lesson.student_id)
   const fit = await checkSlot(ctx, { service, instructorId, start: args.start, pickup, studentId: lesson.student_id, excludeLessonId: lesson.id })
   if (!fit.ok) throw new OsError('conflict', `That time doesn't work (${fit.reason}).`)
   const end = new Date(+args.start + service.duration_min * 60000)
@@ -260,6 +262,12 @@ export async function moveLesson(ctx: Ctx, args: { lessonId: string; start: Date
     throw err
   }
   const after = fmtWhen(asDate(moved.starts_at), ctx.school.timezone)
+  if (moved.status === 'held' && moved.hold_expires_at) {
+    const cap = new Date(Math.min(+asDate(moved.hold_expires_at), +asDate(moved.starts_at) - 3600000))
+    await ctx.q.query(`update rs.lessons set hold_expires_at = $2 where id = $1`, [moved.id, cap])
+    await ctx.q.query(`update rs.payments set expires_at = $2, description = $3 where lesson_id = $1 and status in ('pending','failed')`, [moved.id, cap, `${service.name} — ${after}`])
+    await scheduleJob(ctx, 'hold_expiry', cap, { lessonId: moved.id }, `hold:lesson:${moved.id}`)
+  }
   await cancelJobs(ctx, `remind:lesson:${lesson.id}`)
   if (moved.status === 'booked') {
     const remindAt = new Date(+asDate(moved.starts_at) - ctx.school.playbook.messaging.reminder_hours_before * 3600000)
@@ -271,6 +279,18 @@ export async function moveLesson(ctx: Ctx, args: { lessonId: string; start: Date
   if (args.notify && s) await notifyFamily(ctx, s.id, `${s.first_name}'s driving lesson has moved to ${after} with ${await instructorName(ctx, instructorId)}.`, { reason: 'lesson_moved' })
   await audit(ctx, args.actor, 'lesson.moved', { type: 'lesson', id: lesson.id }, { from: before, to: after })
   return moved
+}
+
+/**
+ * Transaction-scoped advisory locks on the instructor and student, taken before
+ * re-validating a slot. Two concurrent bookings that would each pass the travel
+ * check alone are serialised, so the second sees the first. (Exact overlaps are
+ * also rejected by the database's exclusion constraints.)
+ */
+async function lockScheduling(ctx: Ctx, instructorId: string, studentId: string) {
+  for (const key of [`instr:${instructorId}`, `student:${studentId}`].sort()) {
+    await ctx.q.query(`select pg_advisory_xact_lock(hashtext($1))`, [key])
+  }
 }
 
 export function changeWindow(ctx: Ctx, lesson: Pick<Lesson, 'starts_at'>): { hoursUntil: number; inside: boolean } {
@@ -457,7 +477,8 @@ export async function applyPaymentEvent(ctx: Ctx, args: { paymentId: string; kin
   const amount = fmtMoney(payment.amount_cents, payment.currency)
 
   if (args.kind === 'failed') {
-    if (payment.status === 'paid') return { applied: false, payment, outcome: 'already paid' }
+    // Only an open request can fail; never revive a cancelled, expired or refunded one.
+    if (!['pending', 'failed'].includes(payment.status)) return { applied: false, payment, outcome: `ignored (payment is ${payment.status})` }
     const upd = (await one<Payment>(ctx.q, `update rs.payments set status = 'failed', attempts = attempts + 1, failure_reason = $2 where id = $1 returning *`,
       [payment.id, args.reason ?? 'declined']))!
     await audit(ctx, actor, 'payment.failed', { type: 'payment', id: payment.id }, { amount, reason: args.reason ?? 'declined', attempts: upd.attempts })
@@ -471,7 +492,16 @@ export async function applyPaymentEvent(ctx: Ctx, args: { paymentId: string; kin
     return { applied: true, payment: upd, outcome: 'failed' }
   }
 
-  if (payment.status === 'paid') return { applied: false, payment, outcome: 'already paid' }
+  if (['paid', 'refund_pending', 'refunded'].includes(payment.status)) {
+    // A second successful charge for the same request (e.g. two checkout tabs) must not vanish.
+    if (args.providerRef && payment.provider_ref && args.providerRef !== payment.provider_ref) {
+      const { createInbox } = await import('./inbox.ts')
+      await createInbox(ctx, { kind: 'alert', priority: 'urgent', title: `Possible double payment: ${payment.description}`,
+        detail: `A second successful payment (${args.providerRef}) arrived for a request already marked ${payment.status} (${payment.provider_ref}). Refund the duplicate in Stripe.` })
+      return { applied: false, payment, outcome: 'duplicate charge escalated' }
+    }
+    return { applied: false, payment, outcome: `already ${payment.status}` }
+  }
   const paid = (await one<Payment>(ctx.q, `update rs.payments set status = 'paid', paid_at = $2, provider_ref = coalesce($3, provider_ref) where id = $1 returning *`,
     [payment.id, now(), args.providerRef ?? null]))!
   await audit(ctx, actor, 'payment.paid', { type: 'payment', id: payment.id }, { amount, description: payment.description })
@@ -530,7 +560,7 @@ export async function applyPaymentEvent(ctx: Ctx, args: { paymentId: string; kin
 /** Mark a payment refunded (provider refund happens in the caller, outside the transaction). */
 export async function markRefunded(ctx: Ctx, paymentId: string, actor: Actor): Promise<Payment> {
   const p = await one<Payment>(ctx.q, `select * from rs.payments where id = $1 and school_id = $2 for update`, [paymentId, ctx.school.id])
-  if (!p || p.status !== 'paid') throw new OsError('invalid', 'Only a paid payment can be refunded.')
+  if (!p || !['paid', 'refund_pending'].includes(p.status)) throw new OsError('invalid', 'Only a paid payment can be refunded.')
   const out = (await one<Payment>(ctx.q, `update rs.payments set status = 'refunded' where id = $1 returning *`, [paymentId]))!
   await audit(ctx, actor, 'payment.refunded', { type: 'payment', id: paymentId }, { amount: fmtMoney(p.amount_cents, p.currency) })
   if (p.contact_id) await notifyContact(ctx, p.contact_id, `Your refund of ${fmtMoney(p.amount_cents, p.currency)} (${p.description}) has been issued. It can take 5–10 business days to appear.`, { reason: 'refund' })

@@ -6,7 +6,7 @@
 import { getDb, many, one, type Db } from './db.ts'
 import { loadClock, now } from './clock.ts'
 import { audit } from './audit.ts'
-import { balancePayment, getLesson, getStudent } from './bookings.ts'
+import { balancePayment, getLesson, getStudent, markRefunded } from './bookings.ts'
 import { instructorBrief, ownerBrief } from './insights.ts'
 import { dueJobs, scheduleJob, type Job } from './jobs.ts'
 import { dispatchOutbox, notifyContact, notifyFamily, notifyStaff } from './messaging.ts'
@@ -15,7 +15,14 @@ import { hhmmToMin } from './playbook.ts'
 import { addDays, asDate, fmtMoney, fmtWhen, localDate, localMinutes, zonedToUtc } from './time.ts'
 import { loadSchool, type Ctx } from './school.ts'
 
-const CUSTOMER_FACING = new Set(['lesson_reminder', 'course_reminder', 'balance_reminder'])
+const CUSTOMER_FACING = new Set(['lesson_reminder', 'course_reminder', 'balance_reminder', 'deferred_text'])
+
+/** Text a contact now, or at the end of quiet hours if it's the middle of the night. */
+async function politeText(ctx: Ctx, contactId: string, body: string, reason: string) {
+  const later = quietHoursDeferral(ctx, now())
+  if (later) await scheduleJob(ctx, 'deferred_text', later, { contactId, body, reason }, `text:${reason}:${contactId}:${+now()}`)
+  else await notifyContact(ctx, contactId, body, { reason })
+}
 
 /** If `at` falls in the school's quiet hours, return when quiet hours end. */
 export function quietHoursDeferral(ctx: Ctx, at: Date): Date | null {
@@ -68,7 +75,7 @@ async function runJob(ctx: Ctx, job: Job): Promise<string> {
         await ctx.q.query(`update rs.lessons set status = 'cancelled', cancelled_reason = 'payment hold expired' where id = $1`, [l.id])
         if (pay) await ctx.q.query(`update rs.payments set status = 'expired' where id = $1 and status in ('pending','failed')`, [pay.id])
         await audit(ctx, { type: 'system' }, 'lesson.hold_expired', { type: 'lesson', id: l.id }, {})
-        if (pay?.contact_id) await notifyContact(ctx, pay.contact_id, `The hold on ${fmtWhen(asDate(l.starts_at), tz)} expired because payment wasn't completed, so that time was released. Text me anytime to find a new one.`, { reason: 'hold_expired' })
+        if (pay?.contact_id) await politeText(ctx, pay.contact_id, `The hold on ${fmtWhen(asDate(l.starts_at), tz)} expired because payment wasn't completed, so that time was released. Text me anytime to find a new one.`, 'hold_expired')
         return 'released'
       }
       if (p.enrollmentId) {
@@ -79,7 +86,7 @@ async function runJob(ctx: Ctx, job: Job): Promise<string> {
         await ctx.q.query(`update rs.enrollments set status = 'cancelled' where id = $1`, [e.id])
         if (pay) await ctx.q.query(`update rs.payments set status = 'expired' where id = $1 and status in ('pending','failed')`, [pay.id])
         await audit(ctx, { type: 'system' }, 'enrollment.hold_expired', { type: 'enrollment', id: e.id }, {})
-        if (pay?.contact_id) await notifyContact(ctx, pay.contact_id, `The seat hold (${pay.description}) expired because payment wasn't completed. Text me if you'd still like a seat — I'll check what's open.`, { reason: 'hold_expired' })
+        if (pay?.contact_id) await politeText(ctx, pay.contact_id, `The seat hold (${pay.description}) expired because payment wasn't completed. Text me if you'd still like a seat — I'll check what's open.`, 'hold_expired')
         return 'released'
       }
       return 'nothing to do'
@@ -113,6 +120,10 @@ async function runJob(ctx: Ctx, job: Job): Promise<string> {
       await notifyContact(ctx, contact, `Hi! A balance of ${fmtMoney(pay.amount_cents, pay.currency)} is due for ${pay.description.replace(/^Balance: /, '')}. You can pay securely here: ${paymentLink(pay)}`, { reason: 'balance_reminder' })
       return 'sent'
     }
+    case 'deferred_text': {
+      await notifyContact(ctx, p.contactId, p.body, { reason: p.reason })
+      return 'sent'
+    }
     case 'instructor_brief': {
       const text = await instructorBrief(ctx, p.staffId, p.date)
       if (text) await notifyStaff(ctx, p.staffId, text, { reason: 'daily_brief' })
@@ -136,6 +147,7 @@ export async function runDueJobs(db: Db, schoolId: string): Promise<{ ran: numbe
     const jobs = await dueJobs(db, schoolId)
     if (!jobs.length) break
     for (const job of jobs) {
+      if (job.kind === 'stripe_refund') { results.push(`stripe_refund: ${await runStripeRefund(db, school, job)}`); continue }
       try {
         const r = await db.tx(async (q) => {
           const ctx = { q, school }
@@ -154,6 +166,33 @@ export async function runDueJobs(db: Db, schoolId: string): Promise<{ ran: numbe
   }
   await dispatchOutbox(db, schoolId)
   return { ran: results.length, results }
+}
+
+/**
+ * Stripe refunds run outside any transaction, with the payment id as the
+ * idempotency key, so a retry after a crash can never refund twice.
+ */
+async function runStripeRefund(db: Db, school: NonNullable<Awaited<ReturnType<typeof loadSchool>>>, job: Job): Promise<string> {
+  const paymentId = String(job.payload.paymentId)
+  const p = await one<{ status: string; provider_ref: string | null }>(db, `select status, provider_ref from rs.payments where id = $1 and school_id = $2`, [paymentId, school.id])
+  if (!p || p.status !== 'refund_pending') {
+    await db.query(`update rs.jobs set status = 'done', done_at = $2 where id = $1`, [job.id, now()])
+    return 'nothing pending'
+  }
+  try {
+    const Stripe = (await import('stripe')).default
+    await new Stripe(process.env.STRIPE_SECRET_KEY!).refunds.create({ payment_intent: p.provider_ref! }, { idempotencyKey: `roadsmith-refund-${paymentId}` })
+    await db.tx(async (q) => {
+      await markRefunded({ q, school }, paymentId, { type: 'provider', label: `Stripe (approved by ${String(job.payload.actorLabel ?? 'owner')})` })
+      await q.query(`update rs.jobs set status = 'done', done_at = $2 where id = $1`, [job.id, now()])
+    })
+    return 'refunded'
+  } catch (err) {
+    const msg = String((err as Error).message).slice(0, 300)
+    await db.query(`update rs.jobs set attempts = attempts + 1, last_error = $2, run_at = $3, status = case when attempts >= 4 then 'failed' else status end where id = $1`, [job.id, msg, new Date(+now() + 10 * 60000)])
+    if (job.attempts >= 4) await db.tx((q) => import('./inbox.ts').then(({ createInbox }) => createInbox({ q, school }, { kind: 'alert', priority: 'urgent', title: 'A Stripe refund keeps failing', detail: `Payment ${paymentId}: ${msg}. Issue it from the Stripe dashboard.` })))
+    return `error ${msg}`
+  }
 }
 
 /** Run due work for every school (cron entry point, and lazily in the sandbox). */

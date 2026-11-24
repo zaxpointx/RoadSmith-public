@@ -5,8 +5,9 @@ import { schoolByPhone, type School } from './school.ts'
 import { normalizePhone } from './util.ts'
 import { fmtWhen } from './time.ts'
 
+/** The sandbox phone and its controls exist only when running on the local sandbox database. */
 export function sandboxEnabled(): boolean {
-  return isSandbox() || process.env.ROADSMITH_ENABLE_SANDBOX === '1'
+  return isSandbox()
 }
 
 export async function sandboxSchool(db: Db, phone: string | null | undefined): Promise<School | null> {
@@ -33,7 +34,7 @@ export async function personas(db: Db, school: School): Promise<Persona[]> {
   const contacts = await many<{ name: string; phone: string; kind: string; students: string | null }>(db,
     `select c.name, c.phone, c.kind, string_agg(s.first_name, ', ') as students from rs.contacts c
        left join rs.students s on s.guardian_contact_id = c.id or s.student_contact_id = c.id
-      where c.school_id = $1 and c.name <> '' and c.phone like '+1615555020%' or (c.school_id = $1 and c.phone like '+1615555022%')
+      where c.school_id = $1 and c.name <> '' and (c.phone like '+1615555020%' or c.phone like '+1615555022%')
       group by c.id order by c.kind, c.name`, [school.id])
   return [
     { phone: '+16155550199', name: 'New parent', role: 'lead', detail: 'Unknown number — starts from scratch' },

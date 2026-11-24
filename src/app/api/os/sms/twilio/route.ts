@@ -1,3 +1,4 @@
+import { after } from 'next/server'
 import { ready } from '@/lib/os/sandbox'
 import { handleInbound } from '@/lib/os/agent/router'
 import { validTwilioSignature } from '@/lib/os/twilio'
@@ -16,7 +17,12 @@ export async function POST(req: Request) {
   form.forEach((v, k) => { params[k] = String(v) })
   const url = process.env.TWILIO_WEBHOOK_URL || `${appUrl()}/api/os/sms/twilio`
   if (!validTwilioSignature(token, url, params, req.headers.get('x-twilio-signature'))) return new Response('Invalid signature', { status: 403 })
-  const db = await ready()
-  await handleInbound(db, { to: params.To ?? '', from: params.From ?? '', body: params.Body ?? '' })
+  // Acknowledge Twilio right away (its webhook times out after ~15s) and do the agent turn afterwards.
+  // Retries carry the same MessageSid and are ignored.
+  after(async () => {
+    const db = await ready()
+    await handleInbound(db, { to: params.To ?? '', from: params.From ?? '', body: params.Body ?? '', externalId: params.MessageSid })
+      .catch((err) => console.error('[roadsmith] inbound SMS failed', err))
+  })
   return new Response(EMPTY_TWIML, { headers: { 'Content-Type': 'text/xml' } })
 }

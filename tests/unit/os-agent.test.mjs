@@ -8,7 +8,7 @@ import { handleInbound } from '../../src/lib/os/agent/router.ts'
 import { runTool } from '../../src/lib/os/agent/tools.ts'
 import { checkGrounding } from '../../src/lib/os/agent/grounding.ts'
 import { runClaudeTurn, setClaudeClientFactory } from '../../src/lib/os/agent/claude.ts'
-import { parseDob, parseName, parseAddress, parsePermit } from '../../src/lib/os/agent/interpreter.ts'
+import { parseDob, parseName, parseAddress, parsePermit, specificDate } from '../../src/lib/os/agent/interpreter.ts'
 
 process.env.ROADSMITH_AGENT_ENGINE = 'interpreter'
 const LARKSPUR = '+16155550100', HARBOR = '+16175550100'
@@ -189,4 +189,7 @@ test('interpreter parsers handle common formats', () => {
   assert.deepEqual(parseName("it's for my son Marcus Lee born 2010-06-15"), { first: 'Marcus', last: 'Lee' })
   assert.equal(parseAddress('pick up at 1500 Riverside Dr, Nashville TN 37206 please'), '1500 Riverside Dr, Nashville TN 37206')
   assert.equal(parsePermit('permit number is TN55512345'), 'TN55512345')
+  assert.equal(specificDate('can we do dec 9th in the afternoon', '2026-11-24'), '2026-12-09')
+  assert.equal(specificDate('how about 1/5', '2026-11-24'), '2027-01-05')
+  assert.equal(specificDate('next week please', '2026-11-24'), null)
 })

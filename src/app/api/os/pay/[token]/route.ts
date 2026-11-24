@@ -6,6 +6,7 @@ import { applyPaymentEvent } from '@/lib/os/bookings'
 import { dispatchOutbox } from '@/lib/os/messaging'
 import { now } from '@/lib/os/clock'
 import { fail, json, readJson, sameOrigin } from '@/lib/os/http'
+import { isSandbox } from '@/lib/os/db'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,6 +26,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ token: 
   if (p.expires_at && new Date(p.expires_at) < now()) return fail('This payment link has expired. Text us for a new time.', 410)
   const body = await readJson<{ outcome?: 'paid' | 'declined' }>(req)
   const school = (await loadSchool(db, p.school_id))!
+  // The test checkout only exists for synthetic schools in the local sandbox database.
+  if (!school.is_sandbox || !isSandbox()) return fail('Test checkout is not available for this school.', 403)
   const kind = body.outcome === 'declined' ? 'failed' : 'paid'
   const r = await db.tx((q) => applyPaymentEvent({ q, school }, { paymentId: p.id, kind, eventId: `sandbox_${randomBytes(9).toString('hex')}`, reason: kind === 'failed' ? 'test card declined' : undefined, providerRef: `sandbox_${p.id.slice(0, 8)}` }))
   await dispatchOutbox(db, school.id)

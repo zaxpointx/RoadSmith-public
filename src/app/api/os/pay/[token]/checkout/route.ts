@@ -15,6 +15,12 @@ export async function GET(_req: Request, { params }: { params: Promise<{ token: 
   if (!p || p.provider !== 'stripe' || !['pending', 'failed'].includes(p.status) || (p.expires_at && new Date(p.expires_at) < now())) return Response.redirect(back, 303)
   const school = (await loadSchool(db, p.school_id))!
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+  // One open session per payment: reopening the link returns the same checkout, never a second charge.
+  if (p.checkout_session_id) {
+    const existing = await stripe.checkout.sessions.retrieve(p.checkout_session_id).catch(() => null)
+    if (existing?.status === 'open' && existing.url) return Response.redirect(existing.url, 303)
+    if (existing?.status === 'complete') return Response.redirect(`${back}?done=1`, 303)
+  }
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
     line_items: [{ quantity: 1, price_data: { currency: p.currency, unit_amount: p.amount_cents, product_data: { name: p.description.slice(0, 120) } } }],
@@ -24,6 +30,6 @@ export async function GET(_req: Request, { params }: { params: Promise<{ token: 
     cancel_url: back,
     ...(p.expires_at ? { expires_at: Math.max(Math.floor(+new Date(p.expires_at) / 1000), Math.floor(Date.now() / 1000) + 1800) } : {}),
   })
-  await db.query(`update rs.payments set checkout_url = $2 where id = $1`, [p.id, session.url])
+  await db.query(`update rs.payments set checkout_url = $2, checkout_session_id = $3 where id = $1`, [p.id, session.url, session.id])
   return Response.redirect(session.url!, 303)
 }
