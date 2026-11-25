@@ -99,7 +99,7 @@ export async function verifyCompletion(contract, { commandRunner = runCommand } 
       const baselineFile = baseline?.files?.[relative];
       const currentHash = exists ? await sha256(absolute) : null;
       const changedSinceBaseline = Boolean(baselineFile ? baselineFile.sha256 !== currentHash : exists);
-   files.push({ path: relative, exists, changed, changedSinceBaseline, contentMatches });
+      evidence.files.push({ path: relative, exists, changed, changedSinceBaseline, contentMatches });
       if (!exists) failures.push(`Expected file is missing: ${relative}`);
       if (!changed) failures.push(`Expected file is not present in the Git change set: ${relative}`);
       if (!changedSinceBaseline) failures.push(`Expected file did not change after the captured baseline: ${relative}`);
@@ -133,18 +133,18 @@ export async function verifyCompletion(contract, { commandRunner = runCommand } 
       item.status = executionStatus(item.run, execution.exitCode);
       if (item.status !== "COMPLETE") failures.push(`Test execution is ${item.status}: ${name}`);
     }
- tests.push(item);
+    evidence.tests.push(item);
   }
   for (const check of contract.checks ?? []) {
     const name = check.name ?? "unnamed";
     if (!check.command) {
-   checks.push({ name, status: "INCOMPLETE", exitCode: null });
+      evidence.checks.push({ name, status: "INCOMPLETE", exitCode: null });
       failures.push(`Verification check is incomplete: ${name}`);
       continue;
     }
     const result = await commandRunner(check.command, root);
     const status = result.exitCode === null ? "BLOCKED" : result.exitCode === 0 ? "COMPLETE" : "FAILED";
- checks.push({ name, command: check.command, status, exitCode: result.exitCode });
+    evidence.checks.push({ name, command: check.command, status, exitCode: result.exitCode });
     if (status !== "COMPLETE") failures.push(`Verification check is ${status}: ${name}`);
   }
   const blocked = evidence.tests.some((item) => item.status === "BLOCKED") || evidence.checks.some((item) => item.status === "BLOCKED");

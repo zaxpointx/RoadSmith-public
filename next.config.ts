@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
   // the parent workspace (due to an orphan package-lock.json outside this repo),
   // which made output-file tracing get stuck on an unrelated monorepo.
   outputFileTracingRoot: path.join(__dirname),
+  // PGlite ships WASM + data files; pg is a native-ish driver. Keep both out of the bundle.
+  serverExternalPackages: ['@electric-sql/pglite', 'pg'],
+  // The sandbox applies this migration at runtime.
+  outputFileTracingIncludes: { '/**': ['./supabase/migrations/20261124000000_roadsmith_os.sql'] },
 };
 
 export default nextConfig;

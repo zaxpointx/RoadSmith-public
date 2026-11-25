@@ -15,6 +15,8 @@ index to find the current authority for a question.
 
 | Doc | What it covers |
 | --- | --- |
+| [OS.md](OS.md) | **Roadsmith OS**: the text-message assistant, safety model, verification status, go-live checklist |
+| [research/INDUSTRY-RESEARCH.md](research/INDUSTRY-RESEARCH.md) | Competitors, driving-school workflows, texting/minors/payments compliance research |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | System diagram, code layout, integration boundaries |
 | [DEVELOPMENT.md](DEVELOPMENT.md) | Local setup, scripts, environment variable names, conventions |
 | [TESTING.md](TESTING.md) | Required checks (mirrors CI), unit and end-to-end tests |
